@@ -15,11 +15,13 @@ import {
 } from '../types';
 import api from '../api';
 
-// Типы для API ответов
-interface ApiResponse<T> {
-  data: T;
-  status: number;
-}
+// // Типы для API ответов
+// interface ApiResponse<T> {
+//   data: T;
+//   status: number;
+// }
+
+
 
 interface BudgetContextType {
   // Состояние
@@ -74,10 +76,12 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [session, setSession] = useState<Session>({ 
-    activeMemberId: null, 
-    startTime: null, 
-    isActive: false 
+  const [session, setSession] = useState<Session>(() => {
+    // Восстанавливаем сессию из localStorage при инициализации
+    const savedSession = localStorage.getItem('budget_session');
+    return savedSession 
+      ? JSON.parse(savedSession) 
+      : { activeMemberId: null, startTime: null, isActive: false };
   });
   const [accountBalance, setAccountBalance] = useState<AccountBalance>({
     [AccountType.MAIN]: 0,
@@ -97,11 +101,19 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
           api.get<Income[]>('/incomes'),
           api.get<Expense[]>('/expenses')
         ]);
-
+  
         setFamilyMembers(membersResponse.data);
         setIncomes(incomesResponse.data);
         setExpenses(expensesResponse.data);
         await calculateBalances();
+  
+        // Проверяем сохраненную сессию
+        const savedSession = localStorage.getItem('budget_session');
+        if (savedSession) {
+          const parsedSession = JSON.parse(savedSession);
+          // Дополнительная проверка с бекендом при необходимости
+          setSession(parsedSession);
+        }
       } catch (err) {
         setError('Failed to load initial data');
         console.error(err);
@@ -109,7 +121,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
         setIsLoading(false);
       }
     };
-
+  
     loadInitialData();
   }, []);
 
@@ -177,12 +189,15 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     try {
       const member = familyMembers.find(m => m.id === memberId);
       if (!member) throw new Error('Member not found');
-
-      setSession({
+  
+      const newSession = {
         activeMemberId: memberId,
-        startTime: new Date(),
+        startTime: new Date,
         isActive: true
-      });
+      };
+      
+      setSession(newSession);
+      localStorage.setItem('budget_session', JSON.stringify(newSession));
     } catch (err) {
       console.error('Failed to start session:', err);
       throw err;
@@ -190,11 +205,14 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   };
 
   const endSession = () => {
-    setSession({
+    const newSession = {
       activeMemberId: null,
       startTime: null,
       isActive: false
-    });
+    };
+    
+    setSession(newSession);
+    localStorage.removeItem('budget_session');
   };
 
   // Члены семьи

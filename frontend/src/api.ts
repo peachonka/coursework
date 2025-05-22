@@ -23,4 +23,27 @@ api.interceptors.response.use(
   }
 );
 
+// В api.ts добавляем:
+// Проверка валидности сессии на бекенде
+export const validateSession = async (memberId: string): Promise<boolean> => {
+  try {
+    const response = await api.get(`/sessions/validate/${memberId}`);
+    return response.data.isValid;
+  } catch {
+    return false;
+  }
+};
+
+// Добавляем интерцептор для авторизации
+api.interceptors.request.use((config) => {
+  const savedSession = localStorage.getItem('budget_session');
+  if (savedSession) {
+    const session = JSON.parse(savedSession);
+    if (session.isActive) {
+      config.headers['X-Session-User'] = session.activeMemberId;
+    }
+  }
+  return config;
+});
+
 export default api;

@@ -77,7 +77,6 @@ export interface AccountBalance {
   [AccountType.STASH]: number;   // инвестиционный капитал
 }
 
-
 // Session interface
 export interface Session {
   activeMemberId: string | null;

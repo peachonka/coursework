@@ -3,6 +3,8 @@ import { useBudget } from '../../context/BudgetContext';
 import { ExpenseCategory } from '../../types';
 import { XIcon, AlertCircleIcon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
+import { AccountType } from '../../types';
+
 
 interface ExpenseFormProps {
   onClose: () => void;
@@ -20,9 +22,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
   const [description, setDescription] = useState<string>('');
   const [error, setError] = useState<string>('');
   
-  const totalBalance = accountBalance.main + accountBalance.savings + accountBalance.stash;
+   const totalBalance = 
+   Number(accountBalance[AccountType.MAIN]) +
+   Number(accountBalance[AccountType.SAVINGS]) +
+   Number(accountBalance[AccountType.STASH]);
+
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
@@ -32,7 +38,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
       return;
     }
     
-    const success = addExpense({
+    const success =  await addExpense({
       amount,
       category,
       date: new Date(date),
