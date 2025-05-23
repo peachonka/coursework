@@ -1,5 +1,8 @@
 // Utility functions for date handling
-
+export interface DateRange {
+  startDate: Date;
+  endDate: Date;
+}
 // Format a date to YYYY-MM-DD
 export const formatDateToYYYYMMDD = (date: Date): string => {
   return date.toISOString().split('T')[0];

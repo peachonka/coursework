@@ -5,7 +5,6 @@ import { XIcon, AlertCircleIcon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
 import { AccountType } from '../../types';
 
-
 interface ExpenseFormProps {
   onClose: () => void;
   isPlanned: boolean;
@@ -22,23 +21,22 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
   const [description, setDescription] = useState<string>('');
   const [error, setError] = useState<string>('');
   
-   const totalBalance = 
-   Number(accountBalance[AccountType.MAIN]) +
-   Number(accountBalance[AccountType.SAVINGS]) +
-   Number(accountBalance[AccountType.STASH]);
+  const totalBalance = 
+    Number(accountBalance[AccountType.MAIN]) +
+    Number(accountBalance[AccountType.SAVINGS]) +
+    Number(accountBalance[AccountType.STASH]);
 
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    // Check if balance would become negative for actual expenses
+    // Проверка на отрицательный баланс для фактических расходов
     if (!isPlanned && !canAddExpense(amount)) {
-      setError('Cannot add expense. Total balance would become negative.');
+      setError('Невозможно добавить расход. Общий баланс станет отрицательным.');
       return;
     }
     
-    const success =  await addExpense({
+    const success = await addExpense({
       amount,
       category,
       date: new Date(date),
@@ -50,7 +48,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
     if (success) {
       onClose();
     } else {
-      setError('Cannot add expense. Total balance would become negative.');
+      setError('Невозможно добавить расход. Общий баланс станет отрицательным.');
     }
   };
   
@@ -58,7 +56,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">
-          {isPlanned ? 'Plan Future Expense' : 'Add Expense'}
+          {isPlanned ? 'Планирование будущего расхода' : 'Добавление расхода'}
         </h2>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
           <XIcon size={20} />
@@ -69,7 +67,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 flex items-start">
           <AlertCircleIcon size={20} className="mr-2 flex-shrink-0" />
           <p className="text-sm">
-            Warning: Your total balance is {totalBalance.toLocaleString()} ₽. Adding new expenses is not allowed when balance is negative.
+            Внимание: Ваш общий баланс составляет {totalBalance.toLocaleString()} ₽. 
+            Добавление новых расходов запрещено при отрицательном балансе.
           </p>
         </div>
       )}
@@ -84,7 +83,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (₽)
+              Сумма (₽)
             </label>
             <input
               type="number"
@@ -100,7 +99,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
           
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-              Category
+              Категория
             </label>
             <select
               id="category"
@@ -118,7 +117,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
           
           <div>
             <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-              Date
+              Дата
             </label>
             <input
               type="date"
@@ -132,7 +131,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
           
           <div>
             <label htmlFor="familyMember" className="block text-sm font-medium text-gray-700 mb-1">
-              Family Member
+              Член семьи
             </label>
             <select
               id="familyMember"
@@ -141,7 +140,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
               required
             >
-              <option value="">-- Select family member --</option>
+              <option value="">-- Выберите члена семьи --</option>
               {familyMembers.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name} ({member.relationshipType})
@@ -152,7 +151,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
           
           <div className="md:col-span-2">
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              Описание
             </label>
             <input
               type="text"
@@ -160,7 +159,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
-              placeholder="Enter a brief description"
+              placeholder="Введите краткое описание"
               required
             />
           </div>
@@ -172,14 +171,14 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            Отмена
           </button>
           <button
             type="submit"
             className={`px-4 py-2 ${isPlanned ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'} text-white rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 ${isPlanned ? 'focus:ring-amber-500' : 'focus:ring-red-500'}`}
             disabled={!isPlanned && totalBalance <= 0}
           >
-            {isPlanned ? 'Plan Expense' : 'Add Expense'}
+            {isPlanned ? 'Запланировать расход' : 'Добавить расход'}
           </button>
         </div>
       </form>

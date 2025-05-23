@@ -36,20 +36,20 @@ const Dashboard: React.FC = () => {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
-            Welcome, {currentMember?.name}!
+            Добро пожаловать, {currentMember?.name}!
           </h1>
           <p className="text-gray-600">
-            Here's an overview of your family budget
+            Обзор вашего семейного бюджета
           </p>
         </div>
       </div>
       
-      {/* Summary Cards */}
+      {/* Карточки с общей информацией */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Balance</p>
+              <p className="text-sm text-gray-500">Общий баланс</p>
               <p className={`text-2xl font-bold ${totalBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {totalBalance.toLocaleString()} ₽
               </p>
@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Income</p>
+              <p className="text-sm text-gray-500">Общий доход</p>
               <p className="text-2xl font-bold text-green-600">
                 {summary.totalIncome.toLocaleString()} ₽
               </p>
@@ -77,7 +77,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Expenses</p>
+              <p className="text-sm text-gray-500">Общие расходы</p>
               <p className="text-2xl font-bold text-red-600">
                 {summary.totalExpenses.toLocaleString()} ₽
               </p>
@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Planned Expenses</p>
+              <p className="text-sm text-gray-500">Планируемые расходы</p>
               <p className="text-2xl font-bold text-amber-600">
                 {summary.totalPlannedExpenses.toLocaleString()} ₽
               </p>
@@ -103,13 +103,13 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
       
-      {/* Account Balances */}
+      {/* Балансы счетов */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Account Balances</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Балансы счетов</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-3 bg-blue-50 rounded-lg flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Main Account</p>
+              <p className="text-sm text-gray-600">Основной счёт</p>
               <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.MAIN].toLocaleString()} ₽</p>
             </div>
             <WalletIcon size={28} className="text-blue-500" />
@@ -117,7 +117,7 @@ const Dashboard: React.FC = () => {
           
           <div className="p-3 bg-green-50 rounded-lg flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Savings</p>
+              <p className="text-sm text-gray-600">Накопления</p>
               <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.SAVINGS].toLocaleString()} ₽</p>
             </div>
             <PiggyBankIcon size={28} className="text-green-500" />
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
           
           <div className="p-3 bg-purple-50 rounded-lg flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Stash</p>
+              <p className="text-sm text-gray-600">Заначка</p>
               <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.STASH].toLocaleString()} ₽</p>
             </div>
             <WalletIcon size={28} className="text-purple-500" />
@@ -133,12 +133,12 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
       
-      {/* Recent Transactions */}
+      {/* Последние операции */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Recent Incomes */}
+        {/* Последние доходы */}
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Recent Income</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Последние доходы</h2>
             <BanknoteIcon size={20} className="text-green-500" />
           </div>
           
@@ -160,14 +160,14 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">No recent income</p>
+            <p className="text-gray-500 text-center py-4">Нет последних доходов</p>
           )}
         </div>
         
-        {/* Recent Expenses */}
+        {/* Последние расходы */}
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Recent Expenses</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Последние расходы</h2>
             <ShoppingCartIcon size={20} className="text-red-500" />
           </div>
           
@@ -187,7 +187,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex items-center">
                     {expense.isPlanned && (
                       <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mr-2">
-                        Planned
+                        Запланировано
                       </span>
                     )}
                     <p className="font-semibold text-red-600">-{expense.amount.toLocaleString()} ₽</p>
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">No recent expenses</p>
+            <p className="text-gray-500 text-center py-4">Нет последних расходов</p>
           )}
         </div>
       </div>

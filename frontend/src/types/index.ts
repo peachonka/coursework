@@ -30,13 +30,13 @@ export enum AccountType {
 
 // Expense categories
 export enum ExpenseCategory {
-  FOOD = 'food',
-  CLOTHING = 'clothing',
-  UTILITIES = 'utilities',
-  MOBILE = 'mobile',
-  LEISURE = 'leisure',
-  EDUCATION = 'education',
-  ENTERTAINMENT = 'entertainment',
+  FOOD = 'еда',
+  CLOTHING = 'одежда',
+  UTILITIES = 'услуги',
+  MOBILE = 'связь',
+  LEISURE = 'развлечения',
+  EDUCATION = 'образование',
+  ENTERTAINMENT = '',
   MEDICINE = 'medicine',
   OTHER = 'other'
 }

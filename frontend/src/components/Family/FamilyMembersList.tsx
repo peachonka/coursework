@@ -20,7 +20,7 @@ const FamilyMembersList: React.FC = () => {
   };
   
   const handleRemoveClick = (id: string) => {
-    if (confirm('Are you sure you want to remove this family member?')) {
+    if (confirm('Вы уверены, что хотите удалить этого члена семьи?')) {
       removeFamilyMember(id);
     }
   };
@@ -30,7 +30,7 @@ const FamilyMembersList: React.FC = () => {
     setEditingMember(null);
   };
   
-  // Helper function to display income types as comma-separated list
+  // Функция для отображения типов дохода в виде списка через запятую
   const formatIncomeTypes = (types: IncomeType[]) => {
     return types.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ');
   };
@@ -40,14 +40,14 @@ const FamilyMembersList: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <UsersIcon size={24} className="text-blue-500 mr-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Family Members</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Члены семьи</h1>
         </div>
         <button
           onClick={handleAddClick}
           className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
           <PlusIcon size={16} className="mr-1" />
-          Add Member
+          Добавить
         </button>
       </div>
       
@@ -62,15 +62,15 @@ const FamilyMembersList: React.FC = () => {
       {familyMembers.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow text-center">
           <UsersIcon size={48} className="text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-700 mb-2">No Family Members</h3>
+          <h3 className="text-lg font-medium text-gray-700 mb-2">Нет членов семьи</h3>
           <p className="text-gray-500 mb-4">
-            You haven't added any family members yet. Add your first family member to get started.
+            Вы еще не добавили ни одного члена семьи. Добавьте первого члена семьи, чтобы начать.
           </p>
           <button
             onClick={handleAddClick}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
-            Add Family Member
+            Добавить члена семьи
           </button>
         </div>
       ) : (
@@ -79,16 +79,16 @@ const FamilyMembersList: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  Имя
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Relationship
+                  Родство
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Income Types
+                  Типы дохода
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  Действия
                 </th>
               </tr>
             </thead>

@@ -16,11 +16,11 @@ const Sidebar: React.FC = () => {
   const { endSession } = useBudget();
   
   const navigationItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon size={20} /> },
-    { path: '/family', label: 'Family Members', icon: <UsersIcon size={20} /> },
-    { path: '/income', label: 'Income', icon: <BanknoteIcon size={20} /> },
-    { path: '/expenses', label: 'Expenses', icon: <ShoppingCartIcon size={20} /> },
-    { path: '/reports', label: 'Reports', icon: <BarChartIcon size={20} /> },
+    { path: '/dashboard', label: 'Дашборд', icon: <LayoutDashboardIcon size={20} /> },
+    { path: '/family', label: 'Участники', icon: <UsersIcon size={20} /> },
+    { path: '/income', label: 'Доходы', icon: <BanknoteIcon size={20} /> },
+    { path: '/expenses', label: 'Расходы', icon: <ShoppingCartIcon size={20} /> },
+    { path: '/reports', label: 'Отчёты', icon: <BarChartIcon size={20} /> },
   ];
   
   const handleLogout = () => {
@@ -32,7 +32,7 @@ const Sidebar: React.FC = () => {
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center">
           <HomeIcon size={24} className="text-blue-500" />
-          <h2 className="ml-2 text-xl font-semibold text-gray-800">Family Budget</h2>
+          <h2 className="ml-2 text-xl font-semibold text-gray-800">Семейный бюджет</h2>
         </div>
       </div>
       
@@ -60,7 +60,7 @@ const Sidebar: React.FC = () => {
           className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors duration-200"
         >
           <LogOutIcon size={20} className="mr-3" />
-          End Session
+          Выйти
         </button>
       </div>
     </aside>

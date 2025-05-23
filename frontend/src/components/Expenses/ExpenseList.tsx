@@ -31,10 +31,10 @@ const ExpenseList: React.FC = () => {
   
   const getFamilyMemberName = (id: string) => {
     const member = familyMembers.find(m => m.id === id);
-    return member ? member.name : 'Unknown';
+    return member ? member.name : 'Неизвестно';
   };
   
-  // Get total expenses
+  // Общая сумма расходов
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   
   return (
@@ -42,7 +42,7 @@ const ExpenseList: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <ShoppingCartIcon size={24} className="text-red-500 mr-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Расходы</h1>
         </div>
         <div className="flex space-x-2">
           <button
@@ -50,28 +50,28 @@ const ExpenseList: React.FC = () => {
             className={`flex items-center px-3 py-2 ${showPlannedOnly ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors`}
           >
             <CalendarClockIcon size={16} className="mr-1" />
-            {showPlannedOnly ? 'Showing Planned' : 'All Expenses'}
+            {showPlannedOnly ? 'Только запланированные' : 'Все расходы'}
           </button>
           <button
             onClick={handleToggleFilter}
             className={`flex items-center px-3 py-2 ${showFilter ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors`}
           >
             <FilterIcon size={16} className="mr-1" />
-            Filter
+            Фильтр
           </button>
           <button
             onClick={() => setIsAddingPlannedExpense(true)}
             className="flex items-center px-3 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
           >
             <PlusIcon size={16} className="mr-1" />
-            Plan Expense
+            Запланировать
           </button>
           <button
             onClick={() => setIsAddingExpense(true)}
             className="flex items-center px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
           >
             <PlusIcon size={16} className="mr-1" />
-            Add Expense
+            Добавить расход
           </button>
         </div>
       </div>
@@ -96,10 +96,10 @@ const ExpenseList: React.FC = () => {
         <div className="p-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-800">
-              {showPlannedOnly ? 'Planned Expenses' : 'Expense List'}
+              {showPlannedOnly ? 'Запланированные расходы' : 'Список расходов'}
             </h2>
             <div className="text-red-600 font-semibold">
-              Total: {totalExpenses.toLocaleString()} ₽
+              Итого: {totalExpenses.toLocaleString()} ₽
             </div>
           </div>
         </div>
@@ -109,14 +109,14 @@ const ExpenseList: React.FC = () => {
             <ShoppingCartIcon size={40} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-500">
               {showPlannedOnly 
-                ? 'No planned expenses found.'
-                : 'No expense records found.'}
+                ? 'Запланированные расходы не найдены.'
+                : 'Записи о расходах отсутствуют.'}
             </p>
             <button 
               onClick={() => showPlannedOnly ? setIsAddingPlannedExpense(true) : setIsAddingExpense(true)}
               className={`mt-4 px-4 py-2 ${showPlannedOnly ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'} text-white rounded-md transition-colors`}
             >
-              {showPlannedOnly ? 'Add Planned Expense' : 'Add First Expense'}
+              {showPlannedOnly ? 'Добавить запланированный' : 'Добавить первый расход'}
             </button>
           </div>
         ) : (
@@ -125,22 +125,22 @@ const ExpenseList: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
+                    Дата
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    Категория
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                    Описание
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
+                    Сумма
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Family Member
+                    Член семьи
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Статус
                   </th>
                 </tr>
               </thead>
@@ -167,11 +167,11 @@ const ExpenseList: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {expense.isPlanned ? (
                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
-                          Planned
+                          Запланировано
                         </span>
                       ) : (
                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          Completed
+                          Выполнено
                         </span>
                       )}
                     </td>

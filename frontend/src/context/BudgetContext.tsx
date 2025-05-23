@@ -44,7 +44,7 @@ interface BudgetContextType {
   updateFamilyMember: (id: string, updates: Partial<FamilyMember>) => Promise<void>;
 
   // Управление доходами
-  addIncome: (income: Omit<Income, 'id' | 'date'>) => Promise<void>;
+  addIncome: (income: Omit<Income, 'id'>) => Promise<void>;
   getIncomesByMember: (memberId: string) => Income[];
   getFilteredIncomes: (dateRange?: DateRange) => Income[];
 

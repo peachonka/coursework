@@ -9,19 +9,20 @@ import FamilyMembersList from './components/Family/FamilyMembersList';
 import IncomeList from './components/Income/IncomeList';
 import ExpenseList from './components/Expenses/ExpenseList';
 import ReportView from './components/Reports/ReportView';
-import { useBudget } from './context/BudgetContext';
-import { useLocation } from 'react-router-dom';
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { session } = useBudget();
-  const location = useLocation();
+// import { useBudget } from './context/BudgetContext';
+// import { useLocation } from 'react-router-dom';
 
-  if (!session.isActive) {
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
+// const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+//   const { session } = useBudget();
+//   const location = useLocation();
 
-  return children;
-};
+//   if (!session.isActive) {
+//     return <Navigate to="/" state={{ from: location }} replace />;
+//   }
+
+//   return children;
+// };
 
 function App() {
   return (

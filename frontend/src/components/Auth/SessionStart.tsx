@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useBudget } from '../../context/BudgetContext';
-import { FamilyMember } from '../../types';
 import { useNavigate } from 'react-router-dom';
 
 const SessionStart: React.FC = () => {
@@ -8,7 +7,7 @@ const SessionStart: React.FC = () => {
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const navigate = useNavigate();
 
-  // Redirect if session is already active
+  // Перенаправление, если сессия уже активна
   useEffect(() => {
     if (session.isActive) {
       navigate('/dashboard');
@@ -27,19 +26,19 @@ const SessionStart: React.FC = () => {
     <div>
       {familyMembers.length === 0 ? (
         <div className="text-center">
-          <p className="mb-4 text-gray-600">No family members have been added yet.</p>
+          <p className="mb-4 text-gray-600">Члены семьи ещё не добавлены.</p>
           <button
             onClick={() => navigate('/first-setup')}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
-            Set Up Family Members
+            Настроить членов семьи
           </button>
         </div>
       ) : (
         <form onSubmit={handleStartSession}>
           <div className="mb-4">
             <label htmlFor="familyMember" className="block text-sm font-medium text-gray-700 mb-1">
-              Select Family Member
+              Выберите члена семьи
             </label>
             <select
               id="familyMember"
@@ -48,7 +47,7 @@ const SessionStart: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               required
             >
-              <option value="">-- Select a family member --</option>
+              <option value="">-- Выберите участника --</option>
               {familyMembers.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name} ({member.relationshipType})
@@ -61,7 +60,7 @@ const SessionStart: React.FC = () => {
             disabled={!selectedMemberId}
             className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
           >
-            Start Session
+            Начать сессию
           </button>
         </form>
       )}

@@ -7,22 +7,26 @@ const FirstTimeSetup: React.FC = () => {
   const { addFamilyMember } = useBudget();
   const navigate = useNavigate();
   
+  // Состояние для хранения информации о членах семьи
   const [familyMembers, setFamilyMembers] = useState([
     { name: '', relationshipType: RelationshipType.FATHER, incomeTypes: [] as IncomeType[] }
   ]);
 
+  // Обработчик изменения имени
   const handleNameChange = (index: number, value: string) => {
     const updatedMembers = [...familyMembers];
     updatedMembers[index].name = value;
     setFamilyMembers(updatedMembers);
   };
 
+  // Обработчик изменения родственной связи
   const handleRelationshipChange = (index: number, value: RelationshipType) => {
     const updatedMembers = [...familyMembers];
     updatedMembers[index].relationshipType = value;
     setFamilyMembers(updatedMembers);
   };
 
+  // Обработчик изменения типов дохода
   const handleIncomeTypeChange = (index: number, incomeType: IncomeType) => {
     const updatedMembers = [...familyMembers];
     const currentIncomeTypes = updatedMembers[index].incomeTypes;
@@ -36,6 +40,7 @@ const FirstTimeSetup: React.FC = () => {
     setFamilyMembers(updatedMembers);
   };
 
+  // Добавление нового члена семьи
   const addMember = () => {
     setFamilyMembers([
       ...familyMembers, 
@@ -43,6 +48,7 @@ const FirstTimeSetup: React.FC = () => {
     ]);
   };
 
+  // Удаление члена семьи
   const removeMember = (index: number) => {
     if (familyMembers.length > 1) {
       const updatedMembers = [...familyMembers];
@@ -51,10 +57,11 @@ const FirstTimeSetup: React.FC = () => {
     }
   };
 
+  // Обработчик отправки формы
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Add all family members
+    // Добавляем всех членов семьи
     familyMembers.forEach(member => {
       if (member.name.trim() && member.incomeTypes.length > 0) {
         addFamilyMember(member);
@@ -66,23 +73,23 @@ const FirstTimeSetup: React.FC = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto my-10">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Family Budget Setup</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Настройка семейного бюджета</h1>
       <p className="mb-4 text-gray-600">
-        Welcome to the Family Budget app! Let's set up your family members.
+        Добро пожаловать в приложение Семейный Бюджет! Давайте настроим ваших членов семьи.
       </p>
       
       <form onSubmit={handleSubmit}>
         {familyMembers.map((member, index) => (
           <div key={index} className="mb-6 p-4 border border-gray-200 rounded-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Family Member #{index + 1}</h3>
+              <h3 className="text-lg font-medium">Член семьи #{index + 1}</h3>
               {familyMembers.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeMember(index)}
                   className="text-red-500 hover:text-red-700"
                 >
-                  Remove
+                  Удалить
                 </button>
               )}
             </div>
@@ -90,7 +97,7 @@ const FirstTimeSetup: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
+                  Имя
                 </label>
                 <input
                   type="text"
@@ -103,7 +110,7 @@ const FirstTimeSetup: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Relationship
+                  Родственная связь
                 </label>
                 <select
                   value={member.relationshipType}
@@ -121,7 +128,7 @@ const FirstTimeSetup: React.FC = () => {
             
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Income Types
+                Типы дохода
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {Object.values(IncomeType).map((type) => (
@@ -146,14 +153,14 @@ const FirstTimeSetup: React.FC = () => {
             onClick={addMember}
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
           >
-            Add Another Family Member
+            Добавить члена семьи
           </button>
           
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
-            Complete Setup
+            Завершить настройку
           </button>
         </div>
       </form>

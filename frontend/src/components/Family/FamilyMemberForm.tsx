@@ -43,7 +43,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">
-          {member ? 'Edit Family Member' : 'Add Family Member'}
+          {member ? 'Редактировать члена семьи' : 'Добавить члена семьи'}
         </h2>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
           <XIcon size={20} />
@@ -54,7 +54,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Name
+              Имя
             </label>
             <input
               type="text"
@@ -68,7 +68,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
           
           <div>
             <label htmlFor="relationshipType" className="block text-sm font-medium text-gray-700 mb-1">
-              Relationship Type
+              Тип родства
             </label>
             <select
               id="relationshipType"
@@ -87,7 +87,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
         
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Income Types
+            Типы дохода
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {Object.values(IncomeType).map((type) => (
@@ -113,13 +113,13 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            Отмена
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
-            {member ? 'Update' : 'Add'}
+            {member ? 'Обновить' : 'Добавить'}
           </button>
         </div>
       </form>

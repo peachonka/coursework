@@ -13,13 +13,13 @@ const StatusBar: React.FC<StatusBarProps> = ({ userName, userType, balance }) =>
     <footer className="bg-gray-800 text-white py-2 px-4 text-sm">
       <div className="flex justify-between items-center">
         <div>
-          Current user: <span className="font-medium">{userName}</span> ({userType})
+          Пользователь: <span className="font-medium">{userName}</span> ({userType})
         </div>
         <div>
-          Date: {currentDate}
+          Дата: {currentDate}
         </div>
         <div>
-          Current balance: <span className={`font-medium ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          Общий баланс: <span className={`font-medium ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {balance.toLocaleString()} ₽
           </span>
         </div>

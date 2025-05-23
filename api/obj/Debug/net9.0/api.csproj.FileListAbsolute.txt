@@ -153,3 +153,4 @@ C:\Users\User\Downloads\project-bolt-sb1-md6chjtj\api\obj\Debug\net9.0\refint\ap
 C:\Users\User\Downloads\project-bolt-sb1-md6chjtj\api\obj\Debug\net9.0\api.pdb
 C:\Users\User\Downloads\project-bolt-sb1-md6chjtj\api\obj\Debug\net9.0\api.genruntimeconfig.cache
 C:\Users\User\Downloads\project-bolt-sb1-md6chjtj\api\obj\Debug\net9.0\ref\api.dll
+C:\Users\User\Downloads\project-bolt-sb1-md6chjtj\api\obj\Debug\net9.0\api.sourcelink.json

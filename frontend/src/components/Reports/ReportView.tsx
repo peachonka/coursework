@@ -25,35 +25,35 @@ const ReportView: React.FC = () => {
   
   const getFamilyMemberName = (id: string) => {
     const member = familyMembers.find(m => m.id === id);
-    return member ? member.name : 'Unknown';
+    return member ? member.name : 'Неизвестно';
   };
   
   const getFamilyMemberWithRelation = (id: string) => {
     const member = familyMembers.find(m => m.id === id);
-    if (!member) return 'Unknown';
+    if (!member) return 'Неизвестно';
     return `${member.name} (${member.relationshipType})`;
   };
   
   const handleExportToCSV = () => {
-    // Prepare CSV content
-    let csvContent = 'Category,Person,Amount,Date\n';
+    // Подготовка содержимого CSV
+    let csvContent = 'Категория,Член семьи,Сумма,Дата\n';
     
-    // Add incomes
+    // Добавление доходов
     incomes.forEach(income => {
-      csvContent += `Income (${income.type}),${getFamilyMemberName(income.familyMemberId)},${income.amount},${formatDateToString(income.date)}\n`;
+      csvContent += `Доход (${income.type}),${getFamilyMemberName(income.familyMemberId)},${income.amount},${formatDateToString(income.date)}\n`;
     });
     
-    // Add expenses
+    // Добавление расходов
     expenses.filter(expense => !expense.isPlanned).forEach(expense => {
-      csvContent += `Expense (${expense.category}),${getFamilyMemberName(expense.familyMemberId)},${expense.amount},${formatDateToString(expense.date)}\n`;
+      csvContent += `Расход (${expense.category}),${getFamilyMemberName(expense.familyMemberId)},${expense.amount},${formatDateToString(expense.date)}\n`;
     });
     
-    // Add summary
-    csvContent += `\nTotal Income,,${summary.totalIncome},\n`;
-    csvContent += `Total Expenses,,${summary.totalExpenses},\n`;
-    csvContent += `Balance,,${summary.balance},\n`;
+    // Добавление итогов
+    csvContent += `\nОбщий доход,,${summary.totalIncome},\n`;
+    csvContent += `Общие расходы,,${summary.totalExpenses},\n`;
+    csvContent += `Баланс,,${summary.balance},\n`;
     
-    // Create and trigger download
+    // Создание и скачивание файла
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -66,14 +66,14 @@ const ReportView: React.FC = () => {
   
   const dateRangeDisplay = dateRange 
     ? `${formatDateToString(dateRange.startDate)} - ${formatDateToString(dateRange.endDate)}`
-    : 'All Time';
+    : 'За все время';
   
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <BarChartIcon size={24} className="text-blue-500 mr-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Budget Report</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Отчет по бюджету</h1>
         </div>
         <div className="flex space-x-2">
           <button
@@ -81,14 +81,14 @@ const ReportView: React.FC = () => {
             className={`flex items-center px-3 py-2 ${showFilter ? 'bg-blue-600' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors ${showFilter ? 'text-white' : ''}`}
           >
             <FilterIcon size={16} className="mr-1" />
-            Filter
+            Фильтр
           </button>
           <button
             onClick={handleExportToCSV}
             className="flex items-center px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
           >
             <DownloadIcon size={16} className="mr-1" />
-            Export CSV
+            Экспорт в CSV
           </button>
         </div>
       </div>
@@ -104,7 +104,7 @@ const ReportView: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">
-            Family Budget Balance Report: {dateRangeDisplay}
+            Отчет по семейному бюджету: {dateRangeDisplay}
           </h2>
         </div>
         
@@ -113,32 +113,32 @@ const ReportView: React.FC = () => {
             <thead>
               <tr className="bg-gray-50">
                 <th className="py-2 px-4 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                  Категория
                 </th>
                 <th className="py-2 px-4 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Person
+                  Член семьи
                 </th>
                 <th className="py-2 px-4 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Сумма
                 </th>
                 <th className="py-2 px-4 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
+                  Дата
                 </th>
               </tr>
             </thead>
             <tbody>
-              {/* Income Header */}
+              {/* Заголовок доходов */}
               <tr className="bg-gray-100">
                 <td colSpan={4} className="py-2 px-4 border-b font-semibold text-gray-700">
-                  Income
+                  Доходы
                 </td>
               </tr>
               
-              {/* Income Items */}
+              {/* Строки доходов */}
               {incomes.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-4 px-4 border-b text-center text-gray-500">
-                    No income records found for this period.
+                    Нет записей о доходах за выбранный период.
                   </td>
                 </tr>
               ) : (
@@ -160,18 +160,18 @@ const ReportView: React.FC = () => {
                 ))
               )}
               
-              {/* Expense Header */}
+              {/* Заголовок расходов */}
               <tr className="bg-gray-100">
                 <td colSpan={4} className="py-2 px-4 border-b font-semibold text-gray-700">
-                  Expense
+                  Расходы
                 </td>
               </tr>
               
-              {/* Expense Items */}
+              {/* Строки расходов */}
               {expenses.filter(expense => !expense.isPlanned).length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-4 px-4 border-b text-center text-gray-500">
-                    No expense records found for this period.
+                    Нет записей о расходах за выбранный период.
                   </td>
                 </tr>
               ) : (
@@ -195,15 +195,15 @@ const ReportView: React.FC = () => {
                   ))
               )}
               
-              {/* Summary section */}
+              {/* Итоговая секция */}
               <tr className="bg-gray-200">
                 <td colSpan={4} className="py-2 px-4 border-b font-semibold text-gray-700">
-                  Summary
+                  Итоги
                 </td>
               </tr>
               <tr className="bg-blue-50">
                 <td colSpan={2} className="py-2 px-4 border-b border-r font-semibold text-gray-800">
-                  Total Income
+                  Общий доход
                 </td>
                 <td colSpan={2} className="py-2 px-4 border-b text-green-600 font-bold">
                   {summary.totalIncome.toLocaleString()} ₽
@@ -211,7 +211,7 @@ const ReportView: React.FC = () => {
               </tr>
               <tr className="bg-blue-50">
                 <td colSpan={2} className="py-2 px-4 border-b border-r font-semibold text-gray-800">
-                  Total Expenses
+                  Общие расходы
                 </td>
                 <td colSpan={2} className="py-2 px-4 border-b text-red-600 font-bold">
                   {summary.totalExpenses.toLocaleString()} ₽
@@ -219,7 +219,7 @@ const ReportView: React.FC = () => {
               </tr>
               <tr className="bg-blue-100">
                 <td colSpan={2} className="py-2 px-4 border-b border-r font-semibold text-gray-800">
-                  Balance
+                  Баланс
                 </td>
                 <td colSpan={2} className={`py-2 px-4 border-b font-bold ${summary.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {summary.balance.toLocaleString()} ₽

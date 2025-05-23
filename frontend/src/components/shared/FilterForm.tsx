@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { XIcon } from 'lucide-react';
-import { DateRange, getFirstDayOfMonth, getLastDayOfMonth, getFirstDayOfYear, getLastDayOfYear, formatDateToYYYYMMDD } from '../../utils/dateUtils';
+import { 
+  DateRange,
+  getFirstDayOfMonth, 
+  getLastDayOfMonth, 
+  getFirstDayOfYear, 
+  getLastDayOfYear, 
+  formatDateToYYYYMMDD 
+} from '../../utils/dateUtils';
+
 
 interface FilterFormProps {
   onApply: (dateRange: DateRange | undefined) => void;
@@ -73,7 +81,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
   return (
     <div className="bg-white p-4 rounded-lg shadow-md mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-800">Filter Options</h3>
+        <h3 className="text-lg font-medium text-gray-800">Настройки фильтра</h3>
         <button onClick={onCancel} className="text-gray-500 hover:text-gray-700">
           <XIcon size={20} />
         </button>
@@ -90,7 +98,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            This Month
+            Этот месяц
           </button>
           <button
             type="button"
@@ -101,7 +109,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            This Year
+            Этот год
           </button>
           <button
             type="button"
@@ -112,7 +120,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Custom Range
+            Произвольный период
           </button>
           <button
             type="button"
@@ -123,7 +131,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            All Time
+            За всё время
           </button>
         </div>
         
@@ -131,7 +139,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
+                Начальная дата
               </label>
               <input
                 type="date"
@@ -143,7 +151,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
             </div>
             <div>
               <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                End Date
+                Конечная дата
               </label>
               <input
                 type="date"
@@ -163,14 +171,14 @@ const FilterForm: React.FC<FilterFormProps> = ({ onApply, onCancel, initialDateR
             onClick={onCancel}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            Отмена
           </button>
           <button
             type="button"
             onClick={handleApply}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
-            Apply Filter
+            Применить фильтр
           </button>
         </div>
       </div>

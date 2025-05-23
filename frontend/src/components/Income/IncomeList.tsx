@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBudget } from '../../context/BudgetContext';
-import { Income, IncomeType, AccountType, DateRange } from '../../types';
+import { AccountType, DateRange } from '../../types';
 import { BanknoteIcon, PlusIcon, FilterIcon } from 'lucide-react';
 import { formatDateToString } from '../../utils/dateUtils';
 import IncomeForm from './IncomeForm';
@@ -25,10 +25,10 @@ const IncomeList: React.FC = () => {
   
   const getFamilyMemberName = (id: string) => {
     const member = familyMembers.find(m => m.id === id);
-    return member ? member.name : 'Unknown';
+    return member ? member.name : 'Неизвестно';
   };
   
-  // Get total income
+  // Общий доход
   const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
   
   return (
@@ -36,7 +36,7 @@ const IncomeList: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <BanknoteIcon size={24} className="text-green-500 mr-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Income</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Доходы</h1>
         </div>
         <div className="flex space-x-2">
           <button
@@ -44,14 +44,14 @@ const IncomeList: React.FC = () => {
             className={`flex items-center px-3 py-2 ${showFilter ? 'bg-blue-600' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors ${showFilter ? 'text-white' : ''}`}
           >
             <FilterIcon size={16} className="mr-1" />
-            Filter
+            Фильтр
           </button>
           <button
             onClick={() => setIsAddingIncome(true)}
             className="flex items-center px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
           >
             <PlusIcon size={16} className="mr-1" />
-            Add Income
+            Добавить доход
           </button>
         </div>
       </div>
@@ -71,9 +71,9 @@ const IncomeList: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-800">Income List</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Список доходов</h2>
             <div className="text-green-600 font-semibold">
-              Total: {totalIncome.toLocaleString()} ₽
+              Итого: {totalIncome.toLocaleString()} ₽
             </div>
           </div>
         </div>
@@ -81,12 +81,12 @@ const IncomeList: React.FC = () => {
         {incomes.length === 0 ? (
           <div className="text-center py-8">
             <BanknoteIcon size={40} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500">No income records found.</p>
+            <p className="text-gray-500">Записи о доходах отсутствуют</p>
             <button 
               onClick={() => setIsAddingIncome(true)}
               className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
             >
-              Add First Income
+              Добавить первый доход
             </button>
           </div>
         ) : (
@@ -95,19 +95,19 @@ const IncomeList: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
+                    Дата
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
+                    Тип
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
+                    Сумма
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Family Member
+                    Член семьи
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Account
+                    Счёт
                   </th>
                 </tr>
               </thead>

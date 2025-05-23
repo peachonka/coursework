@@ -35,7 +35,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Add Income</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Добавление дохода</h2>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
           <XIcon size={20} />
         </button>
@@ -45,7 +45,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (₽)
+              Сумма (₽)
             </label>
             <input
               type="number"
@@ -61,7 +61,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
           
           <div>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-              Income Type
+              Тип дохода
             </label>
             <select
               id="type"
@@ -79,7 +79,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
           
           <div>
             <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-              Date
+              Дата
             </label>
             <input
               type="date"
@@ -93,7 +93,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
           
           <div>
             <label htmlFor="familyMember" className="block text-sm font-medium text-gray-700 mb-1">
-              Family Member
+              Член семьи
             </label>
             <select
               id="familyMember"
@@ -102,7 +102,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
               required
             >
-              <option value="">-- Select family member --</option>
+              <option value="">-- Выберите члена семьи --</option>
               {familyMembers.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name} ({member.relationshipType})
@@ -113,7 +113,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
           
           <div>
             <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">
-              Account
+              Счёт
             </label>
             <select
               id="accountType"
@@ -136,13 +136,13 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            Отмена
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
           >
-            Add Income
+            Добавить доход
           </button>
         </div>
       </form>
