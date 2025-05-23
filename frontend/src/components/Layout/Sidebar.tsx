@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   HomeIcon, 
   UsersIcon, 
@@ -9,11 +9,11 @@ import {
   LogOutIcon,
   LayoutDashboardIcon
 } from 'lucide-react';
-import { useBudget } from '../../context/BudgetContext';
+import { authApi } from '../../api'; // Импортируем authApi из нашего API
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { endSession } = useBudget();
+  const navigate = useNavigate();
   
   const navigationItems = [
     { path: '/dashboard', label: 'Дашборд', icon: <LayoutDashboardIcon size={20} /> },
@@ -23,8 +23,15 @@ const Sidebar: React.FC = () => {
     { path: '/reports', label: 'Отчёты', icon: <BarChartIcon size={20} /> },
   ];
   
-  const handleLogout = () => {
-    endSession();
+  const handleLogout = async () => {
+    try {
+      // Вызываем logout из authApi
+      await authApi.logout();
+      // Перенаправляем на страницу входа
+      navigate('/login');
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+    }
   };
   
   return (

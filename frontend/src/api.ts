@@ -1,49 +1,60 @@
-// src/api.ts
+// api.ts
 import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:5080/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  withCredentials: true,
 });
 
-// Типы запросов для API
-export type ApiResponse<T> = {
-  data: T;
-  status: number;
-};
+// Интерцептор для JWT токена
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('jwt_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-// Обработка ошибок
+// Обработчик ошибок
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+    if (error.response?.status === 401) {
+      // Если 401 ошибка - очищаем данные и перенаправляем
+      if (window.location.pathname !== '/auth/login' && window.location.pathname !== '/auth/register') {
+        localStorage.removeItem('jwt_token');
+        window.location.href = '/auth/login';
+      }
+    }
     return Promise.reject(error);
   }
 );
 
-// В api.ts добавляем:
-// Проверка валидности сессии на бекенде
-export const validateSession = async (memberId: string): Promise<boolean> => {
-  try {
-    const response = await api.get(`/sessions/validate/${memberId}`);
-    return response.data.isValid;
-  } catch {
-    return false;
+export const authApi = {
+  login: async (email: string, password: string) => {
+    const response = await api.post('/auth/login', { email, password });
+    localStorage.setItem('jwt_token', response.data.token);
+    return response.data;
+  },
+
+  register: async (email: string, password: string, name: string) => {
+    const response = await api.post('/auth/register', { 
+      email, 
+      password,
+      name 
+    });
+    localStorage.setItem('jwt_token', response.data.token);
+    return response.data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('jwt_token');
+  },
+
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
   }
 };
-
-// Добавляем интерцептор для авторизации
-api.interceptors.request.use((config) => {
-  const savedSession = localStorage.getItem('budget_session');
-  if (savedSession) {
-    const session = JSON.parse(savedSession);
-    if (session.isActive) {
-      config.headers['X-Session-User'] = session.activeMemberId;
-    }
-  }
-  return config;
-});
 
 export default api;

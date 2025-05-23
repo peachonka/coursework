@@ -10,8 +10,8 @@ import {
   DateRange,
   AccountType,
   ExpenseCategory,
-  RelationshipType,
-  IncomeType
+  // RelationshipType,
+  // IncomeType
 } from '../types';
 import api from '../api';
 

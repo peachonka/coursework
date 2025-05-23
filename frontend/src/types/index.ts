@@ -98,3 +98,14 @@ export interface BudgetSummary {
   balance: number;
   dateRange: DateRange;
 }
+
+export interface AuthResponse {
+  token: string;
+  user: UserData;
+}
+
+export interface UserData {
+  id: string;
+  email: string;
+  name: string;
+}

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250521105806_InitialCreate")]
+    [Migration("20250523191143_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -51,12 +51,30 @@ namespace api.Migrations
                     b.ToTable("Expenses");
                 });
 
+            modelBuilder.Entity("BudgetApi.Models.Family", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Families");
+                });
+
             modelBuilder.Entity("BudgetApi.Models.FamilyMember", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.PrimitiveCollection<string>("IncomeTypes")
+                    b.Property<string>("FamilyId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IncomeTypesJson")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -69,7 +87,19 @@ namespace api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FamilyMembers");
                 });
@@ -100,6 +130,52 @@ namespace api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Incomes");
+                });
+
+            modelBuilder.Entity("BudgetApi.Models.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("BudgetApi.Models.FamilyMember", b =>
+                {
+                    b.HasOne("BudgetApi.Models.Family", "Family")
+                        .WithMany("FamilyMembers")
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BudgetApi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Family");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BudgetApi.Models.Family", b =>
+                {
+                    b.Navigation("FamilyMembers");
                 });
 #pragma warning restore 612, 618
         }
