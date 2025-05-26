@@ -2,12 +2,10 @@
 
 // Relationship types within the family
 export enum RelationshipType {
-  FATHER = 'отец',
-  MOTHER = 'мать',
-  SON = 'сын',
-  DAUGHTER = 'дочь',
-  GRANDFATHER = 'дедушка',
-  GRANDMOTHER = 'бабушка',
+  PARENT = 'родитель',
+  CHILD = 'ребенок',
+  SPOUSE = 'муж',
+  SPOUSEE = 'жена',
   OTHER = 'другое'
 }
 
@@ -36,8 +34,7 @@ export enum ExpenseCategory {
   MOBILE = 'связь',
   LEISURE = 'развлечения',
   EDUCATION = 'образование',
-  ENTERTAINMENT = '',
-  MEDICINE = 'medicine',
+  MEDICINE = 'медицина',
   OTHER = 'other'
 }
 

@@ -17,6 +17,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IFamilyService, FamilyService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 // Настройка CORS
 builder.Services.AddCors(options =>

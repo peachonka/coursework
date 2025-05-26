@@ -9,7 +9,7 @@ const FirstTimeSetup: React.FC = () => {
   
   // Состояние для хранения информации о членах семьи
   const [familyMembers, setFamilyMembers] = useState([
-    { name: '', relationshipType: RelationshipType.FATHER, incomeTypes: [] as IncomeType[] }
+    { name: '', relationshipType: RelationshipType.SPOUSE, incomeTypes: [] as IncomeType[]}
   ]);
 
   // Обработчик изменения имени
@@ -44,7 +44,7 @@ const FirstTimeSetup: React.FC = () => {
   const addMember = () => {
     setFamilyMembers([
       ...familyMembers, 
-      { name: '', relationshipType: RelationshipType.MOTHER, incomeTypes: [] as IncomeType[] }
+      { name: '', relationshipType: RelationshipType.CHILD, incomeTypes: [] as IncomeType[] }
     ]);
   };
 
@@ -73,17 +73,17 @@ const FirstTimeSetup: React.FC = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto my-10">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Настройка семейного бюджета</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Настройка</h1>
       <p className="mb-4 text-gray-600">
-        Добро пожаловать в приложение Семейный Бюджет! Давайте настроим ваших членов семьи.
+        Добро пожаловать в приложение Семейный бюджет! Давайте настроим вашу семью.
       </p>
       
       <form onSubmit={handleSubmit}>
         {familyMembers.map((member, index) => (
           <div key={index} className="mb-6 p-4 border border-gray-200 rounded-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Член семьи #{index + 1}</h3>
-              {familyMembers.length > 1 && (
+              <h3 className="text-lg font-medium">{index == 0 ? "Я (создатель)" : "Член семьи #" + index + 1}</h3>
+              {familyMembers.length > 1 && index > 0 && (
                 <button
                   type="button"
                   onClick={() => removeMember(index)}
@@ -95,7 +95,7 @@ const FirstTimeSetup: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              {index > 0 && (<div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Имя
                 </label>
@@ -106,7 +106,7 @@ const FirstTimeSetup: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
-              </div>
+              </div>)}
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -147,7 +147,7 @@ const FirstTimeSetup: React.FC = () => {
           </div>
         ))}
         
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex justify-between space-x-4 items-center mt-4">
           <button
             type="button"
             onClick={addMember}

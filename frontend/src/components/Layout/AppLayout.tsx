@@ -28,9 +28,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <WalletIcon size={48} className="text-blue-500" />
             <h1 className="text-3xl font-bold ml-2 text-gray-800">Семейный бюджет</h1>
           </div>
-          <p className="text-center text-gray-600 mb-6">
-            Пожалуйста, начните новую сессию для доступа к системе семейного бюджета.
-          </p>
           {children}
         </div>
       </div>

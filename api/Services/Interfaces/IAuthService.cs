@@ -6,6 +6,5 @@ namespace BudgetApi.Services
     {
         Task<User> Register(RegisterDto registerDto);
         Task<string> Login(LoginDto loginDto);
-        Task<bool> AssignAdminRole(string currentUserId, string targetUserId);
     }
 }

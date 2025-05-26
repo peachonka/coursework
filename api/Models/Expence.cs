@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BudgetApi.Models
 {
@@ -11,5 +12,8 @@ namespace BudgetApi.Models
         public required string FamilyMemberId { get; set; }
         public required string Description { get; set; }
         public required bool IsPlanned { get; set; }
+
+        [ForeignKey("FamilyMemberId")]
+        public virtual FamilyMember? FamilyMember { get; set; }
     }
 }

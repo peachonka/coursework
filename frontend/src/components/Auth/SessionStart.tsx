@@ -1,11 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import { useNavigate } from 'react-router-dom';
+import { authApi } from '../../api';
+import api from '../../api';
+import axios from 'axios';
+
 
 const SessionStart: React.FC = () => {
   const { familyMembers, startSession, session } = useBudget();
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const navigate = useNavigate();
+  const [creatorEmail, setCreatorEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const handleJoinRequest = async () => {
+    try {
+      setError('');
+      const currentUser = await authApi.getCurrentUser(); // Или из контекста
+      
+      await api.post('/families/request-join', {
+        creatorEmail,
+        userEmail: currentUser.email,
+        message: "Хочу присоединиться к вашей семье"
+      });
+
+      setMessage('Заявка отправлена! Создатель семьи получит уведомление');
+      setCreatorEmail('');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Ошибка при отправке заявки');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Неизвестная ошибка');
+      }
+    }
+  };
 
   // Перенаправление, если сессия уже активна
   useEffect(() => {
@@ -26,13 +57,38 @@ const SessionStart: React.FC = () => {
     <div>
       {familyMembers.length === 0 ? (
         <div className="text-center">
-          <p className="mb-4 text-gray-600">Члены семьи ещё не добавлены.</p>
-          <button
-            onClick={() => navigate('/first-setup')}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          >
-            Настроить членов семьи
-          </button>
+          <p className="mb-4 text-gray-600">Создайте семью или подайте заявку на вступление.</p>
+          
+          <div className="flex flex-col gap-4 max-w-md mx-auto">
+            <button
+              onClick={() => navigate('/first-setup')}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            >
+              Создать семью
+            </button>
+
+            <div className="mt-6">
+              <h3 className="mb-2">Или вступите в существующую семью</h3>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="Email создателя семьи"
+                  className="flex-1 p-2 border rounded-md"
+                  value={creatorEmail}
+                  onChange={(e) => setCreatorEmail(e.target.value)}
+                />
+                <button
+                  onClick={handleJoinRequest}
+                  disabled={!creatorEmail}
+                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-300"
+                >
+                  Подать заявку
+                </button>
+              </div>
+              {message && <p className="mt-2 text-sm text-green-600">{message}</p>}
+              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+            </div>
+          </div>
         </div>
       ) : (
         <form onSubmit={handleStartSession}>

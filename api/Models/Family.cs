@@ -1,10 +1,19 @@
+// Family.cs
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BudgetApi.Models
 {
     public class Family
     {
-        public required string Id { get; set; } = Guid.NewGuid().ToString();
-        public required string Name { get; set; }
-        public List<FamilyMember> FamilyMembers { get; set; } = new();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        
+        [Required]
+        [ForeignKey("User")]
+        public required string CreatorId { get; set; } // ID создателя семьи
+        public virtual required User User { get; set; }
+
+        public virtual ICollection<FamilyMember> FamilyMembers { get; set; } = new List<FamilyMember>();
     }
 }

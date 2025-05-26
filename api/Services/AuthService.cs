@@ -78,23 +78,23 @@ namespace BudgetApi.Services
             return _tokenGenerator.GenerateToken(user);
         }
 
-        public async Task<bool> AssignAdminRole(string currentUserId, string targetUserId)
-        {
-            var currentUser = await _context.FamilyMembers
-                .FirstOrDefaultAsync(fm => fm.UserId == currentUserId);
+        // public async Task<bool> AssignAdminRole(string currentUserId, string targetUserId)
+        // {
+        //     var currentUser = await _context.FamilyMembers
+        //         .FirstOrDefaultAsync(fm => fm.UserId == currentUserId);
             
-            if (currentUser?.Role != "admin") 
-                return false;
+        //     if (currentUser?.Role != "admin") 
+        //         return false;
 
-            var targetMember = await _context.FamilyMembers
-                .FirstOrDefaultAsync(fm => fm.UserId == targetUserId);
+        //     var targetMember = await _context.FamilyMembers
+        //         .FirstOrDefaultAsync(fm => fm.UserId == targetUserId);
             
-            if (targetMember == null) 
-                return false;
+        //     if (targetMember == null) 
+        //         return false;
 
-            targetMember.Role = "admin";
-            await _context.SaveChangesAsync();
-            return true;
-        }
+        //     targetMember.Role = "admin";
+        //     await _context.SaveChangesAsync();
+        //     return true;
+        // }
     }
 }

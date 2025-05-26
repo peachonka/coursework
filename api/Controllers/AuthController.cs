@@ -12,12 +12,14 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context; // Добавляем поле для контекста
     private readonly IAuthService _authService;
+    private readonly IFamilyService _familyService;
 
     // Конструктор с обоими зависимостями
-    public AuthController(AppDbContext context, IAuthService authService)
+    public AuthController(AppDbContext context, IAuthService authService, IFamilyService familyService)
     {
         _context = context; // Сохраняем контекст в поле
         _authService = authService;
+        _familyService = familyService;
     }
 
     [HttpPost("register")]
@@ -50,16 +52,40 @@ public class AuthController : ControllerBase
             name = user.Name
         });
     }
-    
-    [HttpPost("assign-admin/{targetUserId}")]
+
+    // AuthController.cs
+    [HttpPost("create-family")]
     [Authorize]
-    public async Task<IActionResult> AssignAdminRole(string targetUserId)
+    public async Task<IActionResult> CreateFamily(
+        [FromBody] CreateFamilyRequest request)
     {
-        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(currentUserId))
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await _authService.AssignAdminRole(currentUserId, targetUserId);
-        return result ? Ok() : BadRequest();
+        try
+        {
+            var family = await _familyService.CreateFamily(
+                creatorId: userId,
+                relationshipType: request.RelationshipType,
+                incomeTypes: request.IncomeTypes);
+
+            return Ok(new 
+            {
+                family.Id,
+                family.CreatorId,
+                isAdmin = true
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
+}
+
+public class CreateFamilyRequest
+{
+    public string RelationshipType { get; set; }
+    public List<string> IncomeTypes { get; set; }
 }

@@ -30,13 +30,13 @@ namespace BudgetApi.Models
         
         [Required]
         [ForeignKey("User")]
-        public required string UserId { get; set; } = null!;
-        public User User { get; set; }
+        public string? UserId { get; set; }
+        public virtual User? User { get; set; }
         
         [Required]
         [ForeignKey("Family")]
         public required string FamilyId { get; set; } = null!;
-        public Family Family { get; set; }
+        public virtual required Family Family { get; set; }
 
         [Required]
         public string Role { get; set; } = "member";
