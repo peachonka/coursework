@@ -3,8 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { 
   FamilyMember, 
   Income, 
-  Expense, 
-  Session, 
+  Expense,
   AccountBalance,
   BudgetSummary,
   DateRange,
@@ -28,15 +27,9 @@ interface BudgetContextType {
   familyMembers: FamilyMember[];
   incomes: Income[];
   expenses: Expense[];
-  session: Session;
   accountBalance: AccountBalance;
   isLoading: boolean;
   error: string | null;
-
-  // Методы сессии
-  startSession: (memberId: string) => Promise<void>;
-  endSession: () => void;
-  getCurrentMember: () => FamilyMember | undefined;
 
   // Управление членами семьи
   addFamilyMember: (member: Omit<FamilyMember, 'id'>) => Promise<void>;
@@ -76,13 +69,6 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [session, setSession] = useState<Session>(() => {
-    // Восстанавливаем сессию из localStorage при инициализации
-    const savedSession = localStorage.getItem('budget_session');
-    return savedSession 
-      ? JSON.parse(savedSession) 
-      : { activeMemberId: null, startTime: null, isActive: false };
-  });
   const [accountBalance, setAccountBalance] = useState<AccountBalance>({
     [AccountType.MAIN]: 0,
     [AccountType.SAVINGS]: 0,
@@ -106,14 +92,7 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
         setIncomes(incomesResponse.data);
         setExpenses(expensesResponse.data);
         await calculateBalances();
-  
-        // Проверяем сохраненную сессию
-        const savedSession = localStorage.getItem('budget_session');
-        if (savedSession) {
-          const parsedSession = JSON.parse(savedSession);
-          // Дополнительная проверка с бекендом при необходимости
-          setSession(parsedSession);
-        }
+
       } catch (err) {
         setError('Failed to load initial data');
         console.error(err);
@@ -184,37 +163,6 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     }
   };
 
-  // Сессия
-  const startSession = async (memberId: string) => {
-    try {
-      const member = familyMembers.find(m => m.id === memberId);
-      if (!member) throw new Error('Member not found');
-  
-      const newSession = {
-        activeMemberId: memberId,
-        startTime: new Date,
-        isActive: true
-      };
-      
-      setSession(newSession);
-      localStorage.setItem('budget_session', JSON.stringify(newSession));
-    } catch (err) {
-      console.error('Failed to start session:', err);
-      throw err;
-    }
-  };
-
-  const endSession = () => {
-    const newSession = {
-      activeMemberId: null,
-      startTime: null,
-      isActive: false
-    };
-    
-    setSession(newSession);
-    localStorage.removeItem('budget_session');
-  };
-
   // Члены семьи
   const addFamilyMember = async (member: Omit<FamilyMember, 'id'>) => {
     try {
@@ -281,12 +229,6 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     }
   };
 
-  // Вспомогательные методы
-  const getCurrentMember = (): FamilyMember | undefined => {
-    if (!session.isActive || !session.activeMemberId) return undefined;
-    return familyMembers.find(m => m.id === session.activeMemberId);
-  };
-
   const canAddExpense = (amount: number): boolean => {
     const totalBalance = Object.values(accountBalance).reduce((a, b) => a + b, 0);
     return amount <= totalBalance;
@@ -349,17 +291,11 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     familyMembers,
     incomes,
     expenses,
-    session,
     accountBalance,
     getFilteredIncomes,
     getFilteredExpenses,
     isLoading,
     error,
-
-    startSession,
-    endSession,
-    getCurrentMember,
-
     addFamilyMember,
     removeFamilyMember,
     updateFamilyMember: async (id, updates) => {

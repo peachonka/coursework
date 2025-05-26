@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // import { useNavigate } from 'react-router-dom';
 import AppLayout from './components/Layout/AppLayout';
 import AuthForm from './components/Auth/AuthForm';
-import SessionStart from './components/Auth/SessionStart';
+import CreateFamily from './components/Auth/CreateFamily';
 import FirstTimeSetup from './components/Auth/FirstTimeSetup';
 import Dashboard from './components/Dashboard/Dashboard';
 import FamilyMembersList from './components/Family/FamilyMembersList';
@@ -49,7 +49,7 @@ function App() {
               
               <Route path="/" element={
                 <ProtectedRoute>
-                  <SessionStart />
+                  <CreateFamily />
                 </ProtectedRoute>
               } />
               

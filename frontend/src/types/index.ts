@@ -2,10 +2,12 @@
 
 // Relationship types within the family
 export enum RelationshipType {
-  PARENT = 'родитель',
   CHILD = 'ребенок',
   SPOUSE = 'муж',
   SPOUSEE = 'жена',
+  GRANDMOTHER = 'бабушка',
+  GRANDFATHER = 'дедушка',
+  GRANDCHILD = 'внук/ внучка',
   OTHER = 'другое'
 }
 

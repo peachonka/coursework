@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../../services/auth';
 import { AlertCircleIcon, Loader2Icon } from 'lucide-react';
+// import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+
 
 interface AuthFormProps {
   mode: 'signin' | 'signup';
@@ -13,10 +15,12 @@ interface AuthError {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
+  // const { executeRecaptcha } = useGoogleReCaptcha();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [reppassword, setRepPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +32,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
     try {
       if (mode === 'signup') {
         // Add additional signup fields as needed
-        await signUp(email, password, name);
+        if (reppassword !== password) {
+          setError('Пароли не совпадают');
+          return;
+        }
+        else await signUp(email, password, name);
         navigate('/first-setup');
       } else {
         const { token } = await signIn(email, password);
@@ -59,7 +67,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
         {mode === 'signup' && 
         (<div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Name
+            Имя
           </label>
           <input
             type="text"
@@ -90,13 +98,29 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
+            Пароль
           </label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            required
+            minLength={6}
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Повторите пароль
+          </label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setRepPassword(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             required
             minLength={6}
@@ -122,24 +146,24 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
         <p className="text-sm text-center text-gray-600">
           {mode === 'signup' ? (
             <>
-              Already have an account?{' '}
+              Уже есть аккаунт?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/auth/login')}
                 className="text-blue-500 hover:text-blue-600 focus:outline-none"
               >
-                Sign in
+                Войти
               </button>
             </>
           ) : (
             <>
-              Don't have an account?{' '}
+              Ещё нет аккаунта?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/auth/register')}
                 className="text-blue-500 hover:text-blue-600 focus:outline-none"
               >
-                Sign up
+                Зарегистрироваться
               </button>
             </>
           )}

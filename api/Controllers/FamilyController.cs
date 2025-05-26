@@ -90,6 +90,20 @@ namespace BudgetApi.Controllers
                 return StatusCode(500, $"Ошибка при отправке заявки: {ex.Message}");
             }
         }
+
+        // FamilyController.cs
+[HttpGet("current")]
+[Authorize]
+        public async Task<IActionResult> GetCurrentFamily()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var family = await _familyService.GetFamilyByUserId(userId);
+            
+            if (family == null)
+                return NotFound();
+            
+            return Ok(family);
+        }
     }
 
     public class JoinFamilyRequest

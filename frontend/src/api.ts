@@ -31,7 +31,7 @@ export const authApi = {
     localStorage.setItem('jwt_token', data.token);
     return data;
   },
-  register: async (email: string, password: string, name: string) => {
+  register: async (email: string, password: string,  name: string) => {
     const { data } = await api.post('/auth/register', { email, password, name });
     localStorage.setItem('jwt_token', data.token);
     return data;
@@ -62,6 +62,7 @@ export const familyApi = {
   updateFamily: async (id: string, updates: { name?: string }) => 
     (await api.put(`/families/${id}`, updates)).data,
   deleteFamily: async (id: string) => (await api.delete(`/families/${id}`)).data,
+  getCurrentFamily: () => api.get('/families/current'),
 
   // Управление участниками
   getMembers: async (familyId: string) => 

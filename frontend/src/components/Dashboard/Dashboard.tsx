@@ -1,5 +1,8 @@
 import React from 'react';
 import { useBudget } from '../../context/BudgetContext';
+import { authApi } from '../../api';
+import { useEffect, useState } from 'react';
+import { UserData } from '../../types';
 import { 
   BanknoteIcon, 
   ShoppingCartIcon, 
@@ -17,19 +20,27 @@ const Dashboard: React.FC = () => {
     getBudgetSummary, 
     getFilteredIncomes, 
     getFilteredExpenses,
-    accountBalance,
-    getCurrentMember
+    accountBalance
   } = useBudget();
   
-  const currentMember = getCurrentMember();
+
   const summary = getBudgetSummary();
   const recentIncomes = getFilteredIncomes().slice(-5).reverse();
   const recentExpenses = getFilteredExpenses().slice(-5).reverse();
+  const [currentMember, setCurrentMember] = useState<UserData | null>(null);
   
   const totalBalance = 
   Number(accountBalance[AccountType.MAIN]) +
   Number(accountBalance[AccountType.SAVINGS]) +
   Number(accountBalance[AccountType.STASH]);
+
+  useEffect(() => {
+    const fetchCurrentUser  = async () => {
+      const user = await authApi.getCurrentUser ();
+      setCurrentMember(user);
+    };
+    fetchCurrentUser ();
+  }, []);
     
   return (
     <div className="space-y-6">

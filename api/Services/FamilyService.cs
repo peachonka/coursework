@@ -56,7 +56,7 @@ namespace BudgetApi.Services
 
             // Начинаем транзакцию
             using var transaction = await _context.Database.BeginTransactionAsync();
-            
+
             try
             {
                 // Сохраняем семью
@@ -77,6 +77,13 @@ namespace BudgetApi.Services
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+         public async Task<Family> GetFamilyByUserId(string userId)
+        {
+            var family = await _context.Families
+                .FirstOrDefaultAsync(f => f.User.Id == userId);
+            return family;
         }
     }
 }
