@@ -2,7 +2,6 @@
 using BudgetApi.Models;
 using BudgetApi.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -47,7 +46,7 @@ namespace BudgetApi.Services
                 Id = Guid.NewGuid().ToString(),
                 Name = user.Name,
                 RelationshipType = relationshipType,
-                IncomeTypesJson = JsonSerializer.Serialize(incomeTypes),
+                IncomeTypes = incomeTypes,
                 UserId = creatorId,
                 User = user,
                 FamilyId = family.Id,

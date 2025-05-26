@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace BudgetApi.Models
 {
@@ -16,17 +14,8 @@ namespace BudgetApi.Models
         
         [Required]
         public string RelationshipType { get; set; } = null!;
-        
-        // Для SQLite нужно хранить списки как JSON
-        [Column(TypeName = "TEXT")]
-        public string IncomeTypesJson { get; set; } = "[]";
-        
-        [NotMapped]
-        public List<string> IncomeTypes 
-        {
-            get => JsonSerializer.Deserialize<List<string>>(IncomeTypesJson) ?? new();
-            set => IncomeTypesJson = JsonSerializer.Serialize(value);
-        }
+
+        public List<string>? IncomeTypes;
         
         [Required]
         [ForeignKey("User")]

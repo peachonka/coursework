@@ -46,10 +46,7 @@ export const authApi = {
 
 export const familyApi = {
   createFamily: async (relationshipType: string, incomeTypes: string[]) => {
-    const { data } = await api.post('/auth/create-family', {
-      relationshipType,
-      incomeTypes
-    });
+    const { data } = await api.post('/families/create', { relationshipType, incomeTypes });
     return data;
   },
 

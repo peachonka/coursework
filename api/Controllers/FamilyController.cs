@@ -1,11 +1,12 @@
-using BudgetApi.Models;
+// using BudgetApi.Models;
 using Microsoft.AspNetCore.Authorization;
-using BudgetApi.Data;
+// using BudgetApi.Data;
 using BudgetApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+// using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
+
+
 
 namespace BudgetApi.Controllers
 {
@@ -29,18 +30,16 @@ namespace BudgetApi.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateFamily(
-            string creatorId,
-            string relationshipType,
-            List<string> incomeTypes)
+        public async Task<IActionResult> CreateFamily([FromBody] CreateFamilyRequest request)
         {
+            Console.WriteLine("Create family - controller");
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
             try
-            {                
-                var family = await _familyService.CreateFamily(creatorId, relationshipType, incomeTypes);
+            {
+                var family = await _familyService.CreateFamily(userId, request.RelationshipType, request.IncomeTypes);
 
                 return Ok(new
                 {
@@ -79,7 +78,8 @@ namespace BudgetApi.Controllers
                     creator.Email,
                     request.Message ?? "Хочу присоединиться к вашей семье");
 
-                return Ok(new { 
+                return Ok(new
+                {
                     Message = "Заявка отправлена создателю семьи",
                     Creator = creator.Email,
                     User = currentUser.Email

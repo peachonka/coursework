@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import { RelationshipType, IncomeType } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { familyApi } from '../../api';
 
 const FirstTimeSetup: React.FC = () => {
   const { addFamilyMember } = useBudget();
@@ -58,17 +59,29 @@ const FirstTimeSetup: React.FC = () => {
   };
 
   // Обработчик отправки формы
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+    const creator = familyMembers[0];
+    const incomeTypesStrings = creator.incomeTypes.map(type => type.toString());
+    // 1. Создаем семью (асинхронно)
+    await familyApi.createFamily(creator.relationshipType.toString(), incomeTypesStrings);
     
-    // Добавляем всех членов семьи
-    familyMembers.forEach(member => {
+    // 2. Добавляем остальных членов семьи
+    const familyMembersWithoutCreator = familyMembers.slice(1);
+    familyMembersWithoutCreator.forEach(member => {
       if (member.name.trim() && member.incomeTypes.length > 0) {
         addFamilyMember(member);
       }
     });
     
+    // 3. Переходим на главную страницу
     navigate('/');
+    
+  } catch (error) {
+    console.error('Ошибка при создании семьи:', error);
+    alert('Не удалось создать семью. Пожалуйста, попробуйте снова.');
+  }
   };
 
   return (

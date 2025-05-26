@@ -54,38 +54,32 @@ public class AuthController : ControllerBase
     }
 
     // AuthController.cs
-    [HttpPost("create-family")]
-    [Authorize]
-    public async Task<IActionResult> CreateFamily(
-        [FromBody] CreateFamilyRequest request)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+    // [HttpPost("create-family")]
+    // [Authorize]
+    // public async Task<IActionResult> CreateFamily(
+    //     [FromBody] CreateFamilyRequest request)
+    // {
+    //     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    //     if (string.IsNullOrEmpty(userId))
+    //         return Unauthorized();
 
-        try
-        {
-            var family = await _familyService.CreateFamily(
-                creatorId: userId,
-                relationshipType: request.RelationshipType,
-                incomeTypes: request.IncomeTypes);
+    //     try
+    //     {
+    //         var family = await _familyService.CreateFamily(
+    //             creatorId: userId,
+    //             relationshipType: request.RelationshipType,
+    //             incomeTypes: request.IncomeTypes);
 
-            return Ok(new 
-            {
-                family.Id,
-                family.CreatorId,
-                isAdmin = true
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-}
-
-public class CreateFamilyRequest
-{
-    public string RelationshipType { get; set; }
-    public List<string> IncomeTypes { get; set; }
+    //         return Ok(new 
+    //         {
+    //             family.Id,
+    //             family.CreatorId,
+    //             isAdmin = true
+    //         });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(new { error = ex.Message });
+    //     }
+    // }
 }
