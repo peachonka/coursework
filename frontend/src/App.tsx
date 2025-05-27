@@ -1,101 +1,108 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { BudgetProvider } from './context/BudgetContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
-// import { useNavigate } from 'react-router-dom';
-import AppLayout from './components/Layout/AppLayout';
-import AuthForm from './components/Auth/AuthForm';
-import CreateFamily from './components/Auth/CreateFamily';
-import FirstTimeSetup from './components/Auth/FirstTimeSetup';
-import Dashboard from './components/Dashboard/Dashboard';
-import FamilyMembersList from './components/Family/FamilyMembersList';
-import IncomeList from './components/Income/IncomeList';
-import ExpenseList from './components/Expenses/ExpenseList';
-import ReportView from './components/Reports/ReportView';
 
-// Protected Route component
+import type React from "react"
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom"
+import { BudgetProvider } from "./context/BudgetContext"
+import { AuthProvider, useAuth } from "./context/AuthContext"
+import AppLayout from "./components/Layout/AppLayout"
+import AuthLayout from "./components/Layout/AuthLayout"
+import AuthForm from "./components/Auth/AuthForm"
+import CreateFamily from "./components/Auth/CreateFamily"
+import FirstTimeSetup from "./components/Auth/FirstTimeSetup"
+import Dashboard from "./components/Dashboard/Dashboard"
+import FamilyMembersList from "./components/Family/FamilyMembersList"
+import IncomeList from "./components/Income/IncomeList"
+import ExpenseList from "./components/Expenses/ExpenseList"
+import ReportView from "./components/Reports/ReportView"
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth()
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Загрузка...</div>
   }
 
   if (!user) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/auth/login" replace />
   }
 
-  return <>{children}</>;
-};
-
-// // Обернем компоненты, которым нужна навигация
-// const LoginPage = () => {
-//   return <AuthForm mode="signin"/>;
-// };
-
-// const RegisterPage = () => {
-//   return <AuthForm mode="signup"/>;
-// };
+  return <>{children}</>
+}
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <BudgetProvider>
-          <AppLayout>
-            <Routes>
-              <Route path="/auth/login" element={<AuthForm mode="signin"/>} />
-              <Route path="/auth/register" element={<AuthForm mode="signup"/>} />
-              
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <CreateFamily />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/first-setup" element={
-                <ProtectedRoute>
-                  <FirstTimeSetup />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/family" element={
-                <ProtectedRoute>
-                  <FamilyMembersList />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/income" element={
-                <ProtectedRoute>
-                  <IncomeList />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/expenses" element={
-                <ProtectedRoute>
-                  <ExpenseList />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/reports" element={
-                <ProtectedRoute>
-                  <ReportView />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </AppLayout>
+          <Routes>
+            {/* Auth routes with AuthLayout */}
+            <Route element={<AuthLayout />}>
+              <Route path="/auth/login" element={<AuthForm mode="signin" />} />
+              <Route path="/auth/register" element={<AuthForm mode="signup" />} />
+              <Route path="/auth/first-setup" element={<FirstTimeSetup />} />
+              <Route path="/families/create" element={<CreateFamily />} />
+            </Route>
+
+            {/* Main routes with AppLayout */}
+            <Route element={<AppLayout />}>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/family"
+                element={
+                  <ProtectedRoute>
+                    <FamilyMembersList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/income"
+                element={
+                  <ProtectedRoute>
+                    <IncomeList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/expenses"
+                element={
+                  <ProtectedRoute>
+                    <ExpenseList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <ReportView />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
+            {/* Redirects */}
+            <Route path="/register" element={<Navigate to="/auth/register" replace />} />
+            <Route path="/signin" element={<Navigate to="/auth/login" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </BudgetProvider>
       </AuthProvider>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App

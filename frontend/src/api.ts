@@ -6,6 +6,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
+
+
 // Интерцепторы остаются без изменений
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('jwt_token');
@@ -65,6 +67,7 @@ export const familyApi = {
   getCurrentFamily: () => api.get('/families/current'),
 
   // Управление участниками
+  getCurrentMember: () => api.get('/familymembers/current'),
   getMembers: async (familyId: string) => 
     (await api.get(`/familymembers/${familyId}`)).data,
   addMember: async (memberData: { familyId: string; email: string; role: string }) =>

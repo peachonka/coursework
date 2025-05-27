@@ -78,12 +78,5 @@ namespace BudgetApi.Services
                 throw;
             }
         }
-
-         public async Task<Family> GetFamilyByUserId(string userId)
-        {
-            var family = await _context.Families
-                .FirstOrDefaultAsync(f => f.User.Id == userId);
-            return family;
-        }
     }
 }

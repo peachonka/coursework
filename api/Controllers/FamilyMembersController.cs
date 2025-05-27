@@ -2,11 +2,13 @@ using BudgetApi.Models;
 using BudgetApi.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BudgetApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/familymembers")]
     public class FamilyMembersController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -14,6 +16,19 @@ namespace BudgetApi.Controllers
         public FamilyMembersController(AppDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("current")]
+        public async Task<IActionResult> GetCurrentMember()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var member = await _context.FamilyMembers
+                .FirstOrDefaultAsync(m => m.UserId == userId);
+            
+            if (member == null)
+                return NotFound();
+            
+            return Ok(member);
         }
 
         // GET: api/familymembers

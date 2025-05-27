@@ -101,7 +101,8 @@ namespace api.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("FamilyMembers");
                 });
@@ -198,8 +199,8 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.HasOne("BudgetApi.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne()
+                        .HasForeignKey("BudgetApi.Models.FamilyMember", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

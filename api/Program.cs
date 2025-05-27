@@ -9,6 +9,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Укажите ваш фронтенд-адрес
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // Это критически важно для кук
+    });
+});
+
 // Конфигурация базы данных
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -20,19 +31,6 @@ builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-
-// Настройка CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("ReactFrontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
 
 // Настройка аутентификации JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -72,16 +70,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.Use(async (context, next) =>
-{
-    Console.WriteLine($"Incoming request: {context.Request.Method} {context.Request.Path}");
-    await next();
-    Console.WriteLine($"Response: {context.Response.StatusCode}");
-});
+// app.Use(async (context, next) =>
+// {
+//     Console.WriteLine($"Incoming request: {context.Request.Method} {context.Request.Path}");
+//     await next();
+//     Console.WriteLine($"Response: {context.Response.StatusCode}");
+// });
 
 // app.UseHttpsRedirection();
 
-app.UseCors("ReactFrontend");
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

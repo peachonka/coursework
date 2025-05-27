@@ -43,10 +43,11 @@ public class AuthController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var user = await _context.Users // Теперь _context доступен
             .FirstOrDefaultAsync(u => u.Id == userId);
-        
+
         if (user == null) return NotFound();
-        
-        return Ok(new {
+
+        return Ok(new
+        {
             id = user.Id,
             email = user.Email,
             name = user.Name

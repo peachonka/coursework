@@ -1,38 +1,29 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useBudget } from '../../context/BudgetContext';
-import { formatDateToString } from '../../utils/dateUtils';
-import { WalletIcon } from 'lucide-react';
-import StatusBar from './StatusBar';
 import Sidebar from './Sidebar';
-import { AccountType } from '../../types';
+import { AccountType, FamilyMember } from '../../types';
+import { familyApi } from '../../api';
 
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const { session, getCurrentMember, accountBalance } = useBudget();
-  const currentMember = getCurrentMember();
+const AppLayout: React.FC = () => {
+  const { accountBalance } = useBudget();
+  const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
+
+
+  useEffect(() => {
+      const fetchCurrentUser  = async () => {
+        const member = await familyApi.getCurrentMember();
+        setCurrentMember(member.data);
+      };
+      fetchCurrentUser ();
+    }, []);
   
   const totalBalance = 
     Number(accountBalance[AccountType.MAIN]) +
     Number(accountBalance[AccountType.SAVINGS]) +
     Number(accountBalance[AccountType.STASH]);
-    
-  // Если нет активной сессии, показываем экран входа
-  if (!session.isActive) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="p-8 bg-white rounded-lg shadow-lg w-full max-w-md">
-          <div className="flex items-center justify-center mb-6">
-            <WalletIcon size={48} className="text-blue-500" />
-            <h1 className="text-3xl font-bold ml-2 text-gray-800">Семейный бюджет</h1>
-          </div>
-          {children}
-        </div>
-      </div>
-    );
-  }
   
   // При активной сессии показываем основной интерфейс
   return (
@@ -44,13 +35,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Шапка */}
         <header className="bg-white shadow-sm z-10">
-          <div className="px-4 py-3 sm:px-6 flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-800">Семейный бюджет</h1>
-              <p className="text-sm text-gray-500">
-                {session.startTime && `Сессия начата: ${formatDateToString(session.startTime)}`}
-              </p>
-            </div>
+          <div className="px-4 py-3 sm:px-6 flex items-center justify-end">
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-600">Общий баланс</div>
@@ -64,15 +49,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         
         {/* Основная область содержимого */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {children}
+          <Outlet />
         </main>
-        
-        {/* Статус-бар */}
-        <StatusBar 
-          userName={currentMember?.name || 'Гость'} 
-          userType={currentMember?.relationshipType || 'Неизвестно'}
-          balance={totalBalance}
-        />
       </div>
     </div>
   );

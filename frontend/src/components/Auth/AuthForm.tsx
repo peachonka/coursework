@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../../services/auth';
-import { AlertCircleIcon, Loader2Icon } from 'lucide-react';
+import { AlertCircleIcon, Loader2Icon, Eye, EyeOff } from 'lucide-react';
 // import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 
@@ -21,6 +21,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [reppassword, setRepPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepPassword, setShowRepPassword] = useState(false); 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -100,33 +102,53 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Пароль
           </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            required
-            minLength={6}
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 pr-10" // Добавлен pr-10 для отступа
+              required
+              minLength={6}
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)} // Изменяем состояние на противоположное
+              className="absolute right-2 top-2 text-gray-500 hover:text-gray-600 focus:outline-none"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Повторите пароль
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setRepPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            required
-            minLength={6}
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          />
-        </div>
+        {(mode === 'signup') && (
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Повторите пароль
+            </label>
+            <div className="relative">
+              <input
+                type={showRepPassword ? 'text' : 'password'}
+                id="reppassword"
+                value={reppassword}
+                onChange={(e) => setRepPassword(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 pr-10" // Добавлен pr-10 для отступа
+                required
+                minLength={6}
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowRepPassword(!showRepPassword)} // Изменяем состояние на противоположное
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-600 focus:outline-none"
+              >
+                {showRepPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+        )}
 
         <button
           type="submit"
@@ -136,10 +158,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
           {loading ? (
             <>
               <Loader2Icon size={20} className="animate-spin mr-2" />
-              {mode === 'signup' ? 'Creating account...' : 'Signing in...'}
+              {mode === 'signup' ? 'Создаём аккаунт...' : 'Вход в систему...'}
             </>
           ) : (
-            mode === 'signup' ? 'Create Account' : 'Sign In'
+            mode === 'signup' ? 'Создать аккаунт' : 'Войти'
           )}
         </button>
 

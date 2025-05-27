@@ -23,7 +23,7 @@ namespace BudgetApi.Data
                 .HasOne(f => f.User)
                 .WithMany()
                 .HasForeignKey(f => f.CreatorId)
-                .OnDelete(DeleteBehavior.Cascade); // Или Cascade в зависимости от требований
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Настройка связи Family -> FamilyMembers
             modelBuilder.Entity<Family>()
@@ -33,13 +33,12 @@ namespace BudgetApi.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Настройка связи FamilyMember -> User
-            // modelBuilder.Entity<FamilyMember>()
-            //     .HasOne(fm => fm.User)
-            //     .WithMany()
-            //     .HasForeignKey(fm => fm.UserId)
-            //     .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<FamilyMember>()
+                .HasOne(fm => fm.User)
+                .WithOne()
+                .HasForeignKey<FamilyMember>("UserId")
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Дополнительные настройки (если нужно)
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();

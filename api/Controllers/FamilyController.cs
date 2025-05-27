@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 // using BudgetApi.Data;
 using BudgetApi.Services;
 using Microsoft.AspNetCore.Mvc;
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using BudgetApi.Models;
+using BudgetApi.Data;
 
 
 
@@ -19,14 +21,18 @@ namespace BudgetApi.Controllers
         private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
 
+        private readonly AppDbContext _context;
+
         public FamilyController(
             IFamilyService familyService,
             IUserService userService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            AppDbContext context)
         {
             _familyService = familyService;
             _userService = userService;
             _notificationService = notificationService;
+            _context = context;
         }
 
         [HttpPost("create")]
@@ -68,6 +74,8 @@ namespace BudgetApi.Controllers
 
                 // Проверяем существование текущего пользователя
                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (currentUserId == null)
+                    return Unauthorized();
                 var currentUser = await _userService.GetUserById(currentUserId);
                 if (currentUser == null)
                     return Unauthorized();
@@ -92,12 +100,15 @@ namespace BudgetApi.Controllers
         }
 
         // FamilyController.cs
-[HttpGet("current")]
-[Authorize]
+[       HttpGet("current")]
         public async Task<IActionResult> GetCurrentFamily()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var family = await _familyService.GetFamilyByUserId(userId);
+            if (userId == null)
+                return Unauthorized();
+
+            var family = await _context.Families
+                .FirstOrDefaultAsync(f => f.FamilyMembers.Any(fm => fm.UserId == userId));
             
             if (family == null)
                 return NotFound();

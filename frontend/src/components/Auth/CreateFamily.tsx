@@ -10,7 +10,7 @@ const CreateFamily: React.FC = () => {
   const [creatorEmail, setCreatorEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [hasFamily, setHasFamily] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
 
   // Проверяем наличие семьи при загрузке компонента
@@ -18,15 +18,16 @@ const CreateFamily: React.FC = () => {
     const checkFamily = async () => {
       try {
         const response = await familyApi.getCurrentFamily();
-        if (response.data) {
-          setHasFamily(true);
-          navigate('/dashboard');
-        } else {
-          setHasFamily(false);
+        
+        // Явная проверка наличия семьи
+        if (response.status === 200 && response.data?.id) {
+          navigate('/dashboard', { replace: true }); // replace: true предотвращает возврат
+          return;
         }
       } catch (err) {
         console.error('Ошибка проверки семьи:', err);
-        setHasFamily(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -57,9 +58,12 @@ const CreateFamily: React.FC = () => {
     }
   };
 
-  if (hasFamily === null) {
-    return <div className="text-center p-8">Загрузка...</div>;
+  
+
+  if (isLoading) {
+    return <div className="text-center p-8">Проверяем данные...</div>;
   }
+
 
   return (
     <div>

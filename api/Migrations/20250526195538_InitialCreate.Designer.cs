@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250526140856_Fixfamilymembersjson")]
-    partial class Fixfamilymembersjson
+    [Migration("20250526195538_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,7 +104,8 @@ namespace api.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("FamilyMembers");
                 });
@@ -201,8 +202,8 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.HasOne("BudgetApi.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne()
+                        .HasForeignKey("BudgetApi.Models.FamilyMember", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
