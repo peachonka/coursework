@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250526195538_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250528081119_FixMembers")]
+    partial class FixMembers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,14 +62,9 @@ namespace api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Families");
                 });
@@ -80,6 +75,10 @@ namespace api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FamilyId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("IncomeTypes")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -97,7 +96,6 @@ namespace api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -145,14 +143,17 @@ namespace api.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CreatedFamilyId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
@@ -160,6 +161,8 @@ namespace api.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedFamilyId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -172,7 +175,7 @@ namespace api.Migrations
                     b.HasOne("BudgetApi.Models.FamilyMember", "FamilyMember")
                         .WithMany()
                         .HasForeignKey("FamilyMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("FamilyMember");
@@ -183,12 +186,8 @@ namespace api.Migrations
                     b.HasOne("BudgetApi.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("BudgetApi.Models.User", null)
-                        .WithMany("CreatedFamilies")
-                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -202,10 +201,9 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.HasOne("BudgetApi.Models.User", "User")
-                        .WithOne()
+                        .WithOne("FamilyMember")
                         .HasForeignKey("BudgetApi.Models.FamilyMember", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Family");
 
@@ -217,10 +215,19 @@ namespace api.Migrations
                     b.HasOne("BudgetApi.Models.FamilyMember", "FamilyMember")
                         .WithMany()
                         .HasForeignKey("FamilyMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("FamilyMember");
+                });
+
+            modelBuilder.Entity("BudgetApi.Models.User", b =>
+                {
+                    b.HasOne("BudgetApi.Models.Family", "CreatedFamily")
+                        .WithMany()
+                        .HasForeignKey("CreatedFamilyId");
+
+                    b.Navigation("CreatedFamily");
                 });
 
             modelBuilder.Entity("BudgetApi.Models.Family", b =>
@@ -230,7 +237,7 @@ namespace api.Migrations
 
             modelBuilder.Entity("BudgetApi.Models.User", b =>
                 {
-                    b.Navigation("CreatedFamilies");
+                    b.Navigation("FamilyMember");
                 });
 #pragma warning restore 612, 618
         }

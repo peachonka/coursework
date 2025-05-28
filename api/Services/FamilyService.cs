@@ -50,7 +50,6 @@ namespace BudgetApi.Services
                 UserId = creatorId,
                 User = user,
                 FamilyId = family.Id,
-                Family = family,
                 Role = "admin" // Автоматически назначаем роль админа
             };
 

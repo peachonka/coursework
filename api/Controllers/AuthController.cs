@@ -33,11 +33,23 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginDto loginDto)
     {
         var token = await _authService.Login(loginDto);
+        
+        // Устанавливаем куку
+        Response.Cookies.Append("jwt_token", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true, // Для localhost можно false, в production - true
+            SameSite = SameSiteMode.None,
+            Expires = DateTime.UtcNow.AddDays(1),
+            Path = "/", // Важно!
+            Domain = "localhost" // Для локальной разработки
+        });
+        
+        // Возвращаем токен для Swagger/мобильных клиентов
         return Ok(new { token });
     }
 
     [HttpGet("me")]
-    [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -16,14 +16,20 @@ namespace BudgetApi.Data
         public DbSet<Family> Families { get; set; }
         public DbSet<FamilyMember> FamilyMembers { get; set; }
 
+        // Data/AppDbContext.cs
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Уникальный индекс Email для User
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
             // Настройка связи Family -> User (Creator)
             modelBuilder.Entity<Family>()
                 .HasOne(f => f.User)
                 .WithMany()
                 .HasForeignKey(f => f.CreatorId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); // Измените на Cascade если нужно каскадное удаление
 
             // Настройка связи Family -> FamilyMembers
             modelBuilder.Entity<Family>()
@@ -33,26 +39,25 @@ namespace BudgetApi.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Настройка связи FamilyMember -> User
-            modelBuilder.Entity<FamilyMember>()
-                .HasOne(fm => fm.User)
-                .WithOne()
-                .HasForeignKey<FamilyMember>("UserId")
-                .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+                .HasOne(u => u.FamilyMember)
+                .WithOne(fm => fm.User)
+                .HasForeignKey<FamilyMember>(fm => fm.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Настройка для Expenses и Incomes
+            // Настройка для Expenses
             modelBuilder.Entity<Expense>()
                 .HasOne(e => e.FamilyMember)
                 .WithMany()
-                .HasForeignKey(e => e.FamilyMemberId);
+                .HasForeignKey(e => e.FamilyMemberId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // Настройка для Incomes
             modelBuilder.Entity<Income>()
                 .HasOne(i => i.FamilyMember)
                 .WithMany()
-                .HasForeignKey(i => i.FamilyMemberId);
+                .HasForeignKey(i => i.FamilyMemberId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

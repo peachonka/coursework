@@ -3,14 +3,38 @@ import { useBudget } from '../../context/BudgetContext';
 import { RelationshipType, IncomeType } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { familyApi } from '../../api';
+import { useEffect } from 'react';
 
 const FirstTimeSetup: React.FC = () => {
   const { addFamilyMember } = useBudget();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+
+  // Проверяем наличие семьи при загрузке компонента
+    useEffect(() => {
+      const checkFamily = async () => {
+        try {
+          const response = (await familyApi.getCurrentFamily()).data;
+          // Явная проверка наличия семьи
+          if (response.hasFamily) {
+            // console.log('Уже есть семья');
+            navigate('/dashboard', { replace: true }); // replace: true предотвращает возврат
+            return;
+          }
+        } catch (err) {
+          console.error('Ошибка проверки семьи:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
   
+      checkFamily();
+    }, [navigate]);
+
   // Состояние для хранения информации о членах семьи
   const [familyMembers, setFamilyMembers] = useState([
-    { name: '', relationshipType: RelationshipType.SPOUSE, incomeTypes: [] as IncomeType[]}
+    { name: '', relationshipType: RelationshipType.HUSBAND, incomeTypes: [] as IncomeType[]}
   ]);
 
   // Обработчик изменения имени
@@ -62,27 +86,46 @@ const FirstTimeSetup: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-    const creator = familyMembers[0];
-    const incomeTypesStrings = creator.incomeTypes.map(type => type.toString());
-    // 1. Создаем семью (асинхронно)
-    await familyApi.createFamily(creator.relationshipType.toString(), incomeTypesStrings);
-    
-    // 2. Добавляем остальных членов семьи
-    const familyMembersWithoutCreator = familyMembers.slice(1);
-    familyMembersWithoutCreator.forEach(member => {
-      if (member.name.trim() && member.incomeTypes.length > 0) {
-        addFamilyMember(member);
+      // 1. Сначала создаем семью
+      const creator = familyMembers[0];
+      const incomeTypesStrings = creator.incomeTypes.map(type => type.toString());
+      
+      const familyResponse = await familyApi.createFamily(
+        creator.relationshipType.toString(), 
+        incomeTypesStrings
+      );
+      
+      if (!familyResponse?.id) {
+        throw new Error('Не удалось создать семью');
       }
-    });
-    
-    // 3. Переходим на главную страницу
-    navigate('/');
-    
-  } catch (error) {
-    console.error('Ошибка при создании семьи:', error);
-    alert('Не удалось создать семью. Пожалуйста, попробуйте снова.');
-  }
+
+      // 2. Добавляем остальных членов семьи
+      const familyMembersWithoutCreator = familyMembers.slice(1);
+      for (const member of familyMembersWithoutCreator) {
+        if (member.name.trim() && member.incomeTypes.length > 0) {
+          await addFamilyMember({
+            name: member.name,
+            relationshipType: member.relationshipType,
+            incomeTypes: member.incomeTypes,
+            userId: "", // Нужно указать реальный userId
+            familyId: familyResponse.id,
+            role: "member"
+          });
+        }
+      }
+      
+      // 3. Переходим на главную страницу
+      navigate('/dashboard');
+      
+    } catch (error) {
+      console.error('Ошибка при создании семьи:', error);
+      alert(`Не удалось создать семью: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
+    }
   };
+
+  if (isLoading) {
+    return <div className="text-center p-8">Проверяем данные...</div>;
+  }
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto my-10">
@@ -95,7 +138,7 @@ const FirstTimeSetup: React.FC = () => {
         {familyMembers.map((member, index) => (
           <div key={index} className="mb-6 p-4 border border-gray-200 rounded-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">{index == 0 ? "Я (создатель)" : "Член семьи #" + index + 1}</h3>
+              <h3 className="text-lg font-medium">{index == 0 ? "Я (создатель)" : `Член семьи # ${index + 1}`}</h3>
               {familyMembers.length > 1 && index > 0 && (
                 <button
                   type="button"

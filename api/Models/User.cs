@@ -7,18 +7,19 @@ namespace BudgetApi.Models
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        
+
         [Required]
-        [MaxLength(100)]
+        [MaxLength(20)]
         public required string Email { get; set; }
-        
+
         [Required]
         public required string PasswordHash { get; set; }
-        
+
         [Required]
-        [MaxLength(50)]
+        [MaxLength(20)]
         public required string Name { get; set; }
 
-        public virtual ICollection<Family>? CreatedFamilies { get; set; }
+        public virtual Family? CreatedFamily { get; set; }
+        public virtual FamilyMember? FamilyMember { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FamilyMember } from '../../types';
 import { 
   HomeIcon, 
   UsersIcon, 
@@ -11,7 +12,11 @@ import {
 } from 'lucide-react';
 import { authApi } from '../../api'; // Импортируем authApi из нашего API
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  currentMember: FamilyMember | null;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ currentMember }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -25,6 +30,7 @@ const Sidebar: React.FC = () => {
   
   const handleLogout = async () => {
     try {
+      console.log('Вызываем logout из authApi');
       // Вызываем logout из authApi
       await authApi.logout();
       // Перенаправляем на страницу входа
@@ -37,9 +43,9 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="bg-white w-64 hidden md:flex flex-col border-r border-gray-200 shrink-0">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center">
-          <HomeIcon size={24} className="text-blue-500" />
-          <h2 className="ml-2 text-xl font-semibold text-gray-800">Семейный бюджет</h2>
+        <div className="flex flex-col">
+          <h2 className="text-xl font-semibold text-gray-800">{currentMember?.name ?? 'Пользователь не найден'}</h2>
+          <p className="text-sm text-gray-500">{currentMember?.role === 'admin' ? 'Администратор' : 'Участник'}</p>
         </div>
       </div>
       

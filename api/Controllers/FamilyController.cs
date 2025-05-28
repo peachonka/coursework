@@ -110,10 +110,9 @@ namespace BudgetApi.Controllers
             var family = await _context.Families
                 .FirstOrDefaultAsync(f => f.FamilyMembers.Any(fm => fm.UserId == userId));
             
-            if (family == null)
-                return NotFound();
-            
-            return Ok(family);
+            return family == null 
+                ? Ok(new { hasFamily = false, message = "User is not linked to any family" }) 
+                : Ok(new { hasFamily = true, family });
         }
     }
 

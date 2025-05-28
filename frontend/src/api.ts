@@ -70,7 +70,7 @@ export const familyApi = {
   getCurrentMember: () => api.get('/familymembers/current'),
   getMembers: async (familyId: string) => 
     (await api.get(`/familymembers/${familyId}`)).data,
-  addMember: async (memberData: { familyId: string; email: string; role: string }) =>
+  addMember: async (memberData: { familyId: string; name: string; relationshipType: string; incomeTypes: string[] }) =>
     (await api.post(`/familymembers`, memberData)).data,
   removeMember: async (memberId: string) => 
     (await api.delete(`/familymembers/${memberId}`)).data

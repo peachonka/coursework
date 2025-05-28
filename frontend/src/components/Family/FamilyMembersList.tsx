@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBudget } from '../../context/BudgetContext';
-import { FamilyMember, RelationshipType, IncomeType } from '../../types';
-import { UsersIcon, PlusIcon, XIcon, EditIcon, TrashIcon } from 'lucide-react';
+import { FamilyMember } from '../../types';
+import { UsersIcon, PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
 import FamilyMemberForm from './FamilyMemberForm';
 
 const FamilyMembersList: React.FC = () => {
@@ -19,9 +19,13 @@ const FamilyMembersList: React.FC = () => {
     setIsAdding(false);
   };
   
-  const handleRemoveClick = (id: string) => {
+  const handleRemoveClick = async (id: string) => {
     if (confirm('Вы уверены, что хотите удалить этого члена семьи?')) {
-      removeFamilyMember(id);
+      try {
+        await removeFamilyMember(id);
+      } catch (error) {
+        console.error('Failed to remove family member:', error);
+      }
     }
   };
   
@@ -30,9 +34,12 @@ const FamilyMembersList: React.FC = () => {
     setEditingMember(null);
   };
   
-  // Функция для отображения типов дохода в виде списка через запятую
-  const formatIncomeTypes = (types: IncomeType[]) => {
-    return types.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ');
+  // Безопасное форматирование типов дохода
+  const formatIncomeTypes = (types?: string[]) => {
+    if (!types || types.length === 0) return 'Нет данных';
+    return types
+      .map(type => type.charAt(0).toUpperCase() + type.slice(1))
+      .join(', ');
   };
   
   return (
@@ -110,12 +117,14 @@ const FamilyMembersList: React.FC = () => {
                     <button
                       onClick={() => handleEditClick(member)}
                       className="text-indigo-600 hover:text-indigo-900 mr-3"
+                      aria-label="Редактировать"
                     >
                       <EditIcon size={16} />
                     </button>
                     <button
                       onClick={() => handleRemoveClick(member.id)}
                       className="text-red-600 hover:text-red-900"
+                      aria-label="Удалить"
                     >
                       <TrashIcon size={16} />
                     </button>

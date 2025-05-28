@@ -5,31 +5,53 @@ import { useBudget } from '../../context/BudgetContext';
 import Sidebar from './Sidebar';
 import { AccountType, FamilyMember } from '../../types';
 import { familyApi } from '../../api';
-
+import { useNavigate } from 'react-router-dom';
 
 const AppLayout: React.FC = () => {
   const { accountBalance } = useBudget();
   const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
+  const navigate = useNavigate();
 
-
+  // Вызов checkFamily при монтировании компонента
   useEffect(() => {
-      const fetchCurrentUser  = async () => {
-        const member = await familyApi.getCurrentMember();
-        setCurrentMember(member.data);
-      };
-      fetchCurrentUser ();
-    }, []);
-  
+    let isMounted = true;
+
+    const checkFamily = async () => {
+      try {
+        const response = (await familyApi.getCurrentMember()).data;
+
+        if (isMounted) {
+          if (response.isMember && response.member) {
+            setCurrentMember(response.member);
+          } else {
+            navigate('/families/create');
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Ошибка:', err);
+          navigate('/families/create');
+        }
+      }
+    };
+
+    checkFamily();
+
+    // Очистка
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
   const totalBalance = 
     Number(accountBalance[AccountType.MAIN]) +
     Number(accountBalance[AccountType.SAVINGS]) +
     Number(accountBalance[AccountType.STASH]);
   
-  // При активной сессии показываем основной интерфейс
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Боковая панель */}
-      <Sidebar />
+      <Sidebar currentMember={currentMember} />
       
       {/* Основное содержимое */}
       <div className="flex flex-col flex-1 overflow-hidden">

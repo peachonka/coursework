@@ -166,10 +166,19 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   // Члены семьи
   const addFamilyMember = async (member: Omit<FamilyMember, 'id'>) => {
     try {
-      const response = await api.post<FamilyMember>('/familymembers', member);
+      const response = await api.post<FamilyMember>('/familymembers', {
+        name: member.name,
+        relationshipType: member.relationshipType,
+        incomeTypes: member.incomeTypes,
+        userId: member.userId || null,
+        familyId: member.familyId,
+        role: member.role || "member"
+      });
+
       setFamilyMembers(prev => [...prev, response.data]);
+      return;
     } catch (err) {
-      console.error('Failed to add family member:', err);
+      console.error('Ошибка при добавлении члена семьи:', err);
       throw err;
     }
   };

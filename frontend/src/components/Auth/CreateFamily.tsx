@@ -17,13 +17,17 @@ const CreateFamily: React.FC = () => {
   useEffect(() => {
     const checkFamily = async () => {
       try {
-        const response = await familyApi.getCurrentFamily();
+        const response = (await familyApi.getCurrentFamily()).data;
         
         // Явная проверка наличия семьи
-        if (response.status === 200 && response.data?.id) {
+        if (response.hasFamily) {
+          // console.log('Уже есть семья');
           navigate('/dashboard', { replace: true }); // replace: true предотвращает возврат
           return;
         }
+        // else {
+        //   console.log('Нет семьи');
+        // }
       } catch (err) {
         console.error('Ошибка проверки семьи:', err);
       } finally {
@@ -72,7 +76,7 @@ const CreateFamily: React.FC = () => {
           
           <div className="flex flex-col gap-4 max-w-md mx-auto">
             <button
-              onClick={() => navigate('/first-setup')}
+              onClick={() => navigate('/auth/first-setup')}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Создать семью

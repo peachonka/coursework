@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace BudgetApi.Controllers
 {
@@ -24,11 +25,10 @@ namespace BudgetApi.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var member = await _context.FamilyMembers
                 .FirstOrDefaultAsync(m => m.UserId == userId);
-            
-            if (member == null)
-                return NotFound();
-            
-            return Ok(member);
+
+            return member == null
+                ? Ok(new { isMember = false, message = "User is not linked to any member" })
+                : Ok(new { isMember = true, member });
         }
 
         // GET: api/familymembers
@@ -40,8 +40,23 @@ namespace BudgetApi.Controllers
 
         // POST: api/familymembers
         [HttpPost]
-        public async Task<ActionResult<FamilyMember>> PostFamilyMember(FamilyMember member)
+        public async Task<ActionResult<FamilyMember>> PostFamilyMember([FromBody] FamilyMemberDto memberDto)
         {
+            // Валидация
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Создаем нового члена семьи
+            var member = new FamilyMember
+            {
+                Name = memberDto.Name,
+                RelationshipType = memberDto.RelationshipType,
+                IncomeTypes = memberDto.IncomeTypes ?? new List<string>(),
+                UserId = memberDto.UserId,
+                FamilyId = memberDto.FamilyId,
+                Role = memberDto.Role ?? "member"
+            };
+
             _context.FamilyMembers.Add(member);
             await _context.SaveChangesAsync();
 
@@ -61,4 +76,23 @@ namespace BudgetApi.Controllers
             return NoContent();
         }
     }
+}
+
+public class FamilyMemberDto
+{
+    [Required]
+    [StringLength(50)]
+    public string Name { get; set; } = null!;
+    
+    [Required]
+    public string RelationshipType { get; set; } = null!;
+
+    public List<string>? IncomeTypes { get; set; }
+    
+    public string? UserId { get; set; } = null!;
+    
+    [Required]
+    public string FamilyId { get; set; } = null!;
+
+    public string? Role { get; set; }
 }

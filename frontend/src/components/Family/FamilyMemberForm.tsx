@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import { FamilyMember, RelationshipType, IncomeType } from '../../types';
 import { XIcon } from 'lucide-react';
+import { familyApi } from '../../api';
 
 interface FamilyMemberFormProps {
   member?: FamilyMember;
@@ -13,22 +14,67 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
   
   const [name, setName] = useState(member?.name || '');
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(
-    member?.relationshipType || RelationshipType.FATHER
+    member?.relationshipType || RelationshipType.HUSBAND
   );
   const [incomeTypes, setIncomeTypes] = useState<IncomeType[]>(
     member?.incomeTypes || []
   );
-  
-  const handleSubmit = (e: React.FormEvent) => {
+  const [role, setRole] = useState(member?.role || 'member');
+  const [currentmember, setCurrentmember] = useState<FamilyMember | null>(null);
+  const [familyId, setFamilyId] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFamilyId = async () => {
+      try {
+        const response = (await familyApi.getCurrentFamily()).data;
+        if (response.hasFamily && response.family?.id) {
+          setFamilyId(response.family.id);
+        } else {
+          console.error('Семья не найдена');
+        }
+      } catch (err) {
+        console.error('Ошибка при получении семьи:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFamilyId();
+  }, []);
+
+  const getCurrent = async () => {
+    try {
+      const response = (await familyApi.getCurrentMember()).data;
+      setCurrentmember(response);
+    } catch (err) {
+      console.error('Ошибка при получении текущего члена семьи:', err);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    addFamilyMember({
-      name,
-      relationshipType,
-      incomeTypes
-    });
-    
-    onClose();
+    if (!familyId) {
+      alert('Не удалось определить ID семьи');
+      return;
+    }
+
+    try {
+      await addFamilyMember({
+        name,
+        familyId,
+        userId: "", // TODO: Замените на реальный userId
+        relationshipType,
+        incomeTypes,
+        role
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Ошибка при добавлении члена семьи:', error);
+      alert('Не удалось добавить члена семьи');
+    }
   };
   
   const handleIncomeTypeToggle = (type: IncomeType) => {
@@ -38,6 +84,10 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
       setIncomeTypes([...incomeTypes, type]);
     }
   };
+
+  if (isLoading) {
+    return <div className="text-center p-4">Загрузка данных семьи...</div>;
+  }
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -84,6 +134,25 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
             </select>
           </div>
         </div>
+
+        {currentmember?.role === 'admin' && (<div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Роль
+          </label>
+          <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            >
+                <option key={0} value={'admin'}>
+                  Администратор
+                </option>
+                 <option key={1} value={'member'}>
+                  Участник
+                </option>
+            </select>
+        </div>)}
         
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -118,6 +187,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            disabled={!familyId}
           >
             {member ? 'Обновить' : 'Добавить'}
           </button>

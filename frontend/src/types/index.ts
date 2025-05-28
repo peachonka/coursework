@@ -3,8 +3,8 @@
 // Relationship types within the family
 export enum RelationshipType {
   CHILD = 'ребенок',
-  SPOUSE = 'муж',
-  SPOUSEE = 'жена',
+  HUSBAND = 'муж',
+  WIFE = 'жена',
   GRANDMOTHER = 'бабушка',
   GRANDFATHER = 'дедушка',
   GRANDCHILD = 'внук/ внучка',
@@ -44,8 +44,11 @@ export enum ExpenseCategory {
 export interface FamilyMember {
   id: string;
   name: string;
+  familyId: string;
+  userId: string;
   relationshipType: RelationshipType;
   incomeTypes: IncomeType[];
+  role: string;
 }
 
 // Income transaction interface
