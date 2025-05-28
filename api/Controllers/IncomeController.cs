@@ -23,26 +23,42 @@ namespace BudgetApi.Controllers
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            IQueryable<Income> query = _context.Incomes;
+            try
+            {
+                IQueryable<Income> query = _context.Incomes;
 
-            if (!string.IsNullOrEmpty(memberId))
-                query = query.Where(i => i.FamilyMemberId == memberId);
+                if (!string.IsNullOrEmpty(memberId))
+                    query = query.Where(i => i.FamilyMemberId == memberId);
 
-            if (startDate.HasValue)
-                query = query.Where(i => i.Date >= startDate);
+                if (startDate.HasValue)
+                    query = query.Where(i => i.Date >= startDate.Value.ToUniversalTime());
 
-            if (endDate.HasValue)
-                query = query.Where(i => i.Date <= endDate);
+                if (endDate.HasValue)
+                    query = query.Where(i => i.Date <= endDate.Value.ToUniversalTime());
 
-            return await query.ToListAsync();
+                var result = await query.ToListAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         // POST: api/incomes
         [HttpPost]
-        public async Task<ActionResult<Income>> PostIncome(Income income)
+        public async Task<ActionResult<Income>> PostIncome(
+            [FromBody] IncomeCreateDto incomeDto)
         {
-            income.Id = Guid.NewGuid().ToString();
-            income.Date = DateTime.UtcNow;
+            var income = new Income
+            {
+                Id = Guid.NewGuid().ToString(),
+                Amount = incomeDto.Amount,
+                Type = incomeDto.Type,
+                AccountType = incomeDto.AccountType,
+                FamilyMemberId = incomeDto.FamilyMemberId,
+                Date = incomeDto.Date
+            };
 
             _context.Incomes.Add(income);
             await _context.SaveChangesAsync();
@@ -50,4 +66,13 @@ namespace BudgetApi.Controllers
             return CreatedAtAction(nameof(GetIncomes), new { id = income.Id }, income);
         }
     }
+}
+
+public class IncomeCreateDto
+{
+    public decimal Amount { get; set; }
+    public required string AccountType { get; set; }
+    public required string Type { get; set; }
+    public required string FamilyMemberId { get; set; }
+    public DateTime Date { get; set; }
 }

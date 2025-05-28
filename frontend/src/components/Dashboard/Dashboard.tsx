@@ -44,6 +44,18 @@ const Dashboard: React.FC = () => {
     
   return (
     <div className="space-y-6">
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+      >
+        <source src="/videos/background-gradient.mp4" type="video/mp4" />
+        Ваш браузер не поддерживает видео.
+      </video>
+
+      <div className="relative z-10 space-y-6 p-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
@@ -210,6 +222,7 @@ const Dashboard: React.FC = () => {
             <p className="text-gray-500 text-center py-4">Нет последних расходов</p>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

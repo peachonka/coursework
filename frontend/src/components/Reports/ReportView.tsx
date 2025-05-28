@@ -4,6 +4,9 @@ import { BarChartIcon, DownloadIcon, FilterIcon } from 'lucide-react';
 import { Income, Expense, DateRange } from '../../types';
 import { formatDateToString } from '../../utils/dateUtils';
 import FilterForm from '../shared/FilterForm';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import { Document, Paragraph, Packer, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
 
 const ReportView: React.FC = () => {
   const { getFilteredIncomes, getFilteredExpenses, getBudgetSummary, familyMembers } = useBudget();
@@ -33,37 +36,179 @@ const ReportView: React.FC = () => {
     if (!member) return 'Неизвестно';
     return `${member.name} (${member.relationshipType})`;
   };
-  
+
+  // Экспорт в CSV (оставлен для совместимости)
   const handleExportToCSV = () => {
-    // Подготовка содержимого CSV
     let csvContent = 'Категория,Член семьи,Сумма,Дата\n';
     
-    // Добавление доходов
     incomes.forEach(income => {
       csvContent += `Доход (${income.type}),${getFamilyMemberName(income.familyMemberId)},${income.amount},${formatDateToString(income.date)}\n`;
     });
     
-    // Добавление расходов
     expenses.filter(expense => !expense.isPlanned).forEach(expense => {
       csvContent += `Расход (${expense.category}),${getFamilyMemberName(expense.familyMemberId)},${expense.amount},${formatDateToString(expense.date)}\n`;
     });
     
-    // Добавление итогов
     csvContent += `\nОбщий доход,,${summary.totalIncome},\n`;
     csvContent += `Общие расходы,,${summary.totalExpenses},\n`;
     csvContent += `Баланс,,${summary.balance},\n`;
     
-    // Создание и скачивание файла
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'family_budget_report.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    saveAs(blob, 'family_budget_report.csv');
   };
-  
+
+  // Экспорт в Excel (XLSX)
+  const handleExportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Отчет");
+
+  // Заголовки
+  worksheet.addRow(["Категория", "Член семьи", "Сумма", "Дата"]);
+
+  // Данные
+  incomes.forEach(income => {
+    worksheet.addRow([
+      `Доход (${income.type})`,
+      getFamilyMemberName(income.familyMemberId),
+      income.amount,
+      formatDateToString(income.date)
+    ]);
+  });
+
+  expenses.forEach(expense => {
+    worksheet.addRow([
+      `Расход (${expense.category})`,
+      getFamilyMemberName(expense.familyMemberId),
+      expense.amount,
+      formatDateToString(expense.date)
+    ]);
+  });
+
+  // Сохранение
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), "budget_report.xlsx");
+};
+
+
+  // Экспорт в Word (DOCX)
+  const handleExportToWord = async () => {
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: 'Отчет по семейному бюджету',
+                bold: true,
+                size: 28,
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: dateRange 
+                  ? `Период: ${formatDateToString(dateRange.startDate)} - ${formatDateToString(dateRange.endDate)}`
+                  : 'Период: За все время',
+                size: 22,
+              }),
+            ],
+          }),
+          new Paragraph({ text: 'Доходы', heading: 'Heading2', spacing: { after: 100 } }),
+          new Table({
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Категория')], width: { size: 3000, type: WidthType.DXA } }),
+                  new TableCell({ children: [new Paragraph('Член семьи')], width: { size: 3000, type: WidthType.DXA } }),
+                  new TableCell({ children: [new Paragraph('Сумма')], width: { size: 2000, type: WidthType.DXA } }),
+                  new TableCell({ children: [new Paragraph('Дата')], width: { size: 2000, type: WidthType.DXA } }),
+                ],
+              }),
+              ...incomes.map(income => new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph(`Доход (${income.type})`)] }),
+                  new TableCell({ children: [new Paragraph(getFamilyMemberWithRelation(income.familyMemberId))] }),
+                  new TableCell({ children: [new Paragraph(income.amount.toString())] }),
+                  new TableCell({ children: [new Paragraph(formatDateToString(income.date))] }),
+                ],
+              })),
+              ...(incomes.length === 0 ? [new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Нет данных')], columnSpan: 4 }),
+                ],
+              })] : []),
+            ],
+          }),
+          new Paragraph({ text: 'Расходы', heading: 'Heading2', spacing: { before: 400, after: 100 } }),
+          new Table({
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Категория')] }),
+                  new TableCell({ children: [new Paragraph('Член семьи')] }),
+                  new TableCell({ children: [new Paragraph('Сумма')] }),
+                  new TableCell({ children: [new Paragraph('Дата')] }),
+                ],
+              }),
+              ...expenses
+                .filter(expense => !expense.isPlanned)
+                .map(expense => new TableRow({
+                  children: [
+                    new TableCell({ children: [new Paragraph(`Расход (${expense.category})`)] }),
+                    new TableCell({ children: [new Paragraph(getFamilyMemberWithRelation(expense.familyMemberId))] }),
+                    new TableCell({ children: [new Paragraph(expense.amount.toString())] }),
+                    new TableCell({ children: [new Paragraph(formatDateToString(expense.date))] }),
+                  ],
+                })),
+              ...(expenses.filter(expense => !expense.isPlanned).length === 0 ? [new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Нет данных')], columnSpan: 4 }),
+                ],
+              })] : []),
+            ],
+          }),
+          new Paragraph({ text: 'Итоги', heading: 'Heading2', spacing: { before: 400, after: 100 } }),
+          new Table({
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Общий доход')], columnSpan: 2 }),
+                  new TableCell({ children: [new Paragraph(summary.totalIncome.toString())], columnSpan: 2 }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Общие расходы')], columnSpan: 2 }),
+                  new TableCell({ children: [new Paragraph(summary.totalExpenses.toString())], columnSpan: 2 }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph('Баланс')], columnSpan: 2 }),
+                  new TableCell({ 
+                    children: [new Paragraph({
+                      children: [new TextRun({
+                        text: summary.balance.toString(),
+                        color: summary.balance >= 0 ? '00FF00' : 'FF0000',
+                      })],
+                    })],
+                    columnSpan: 2,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, 'family_budget_report.docx');
+  };
+
   const dateRangeDisplay = dateRange 
     ? `${formatDateToString(dateRange.startDate)} - ${formatDateToString(dateRange.endDate)}`
     : 'За все время';
@@ -83,13 +228,32 @@ const ReportView: React.FC = () => {
             <FilterIcon size={16} className="mr-1" />
             Фильтр
           </button>
-          <button
-            onClick={handleExportToCSV}
-            className="flex items-center px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
-          >
-            <DownloadIcon size={16} className="mr-1" />
-            Экспорт в CSV
-          </button>
+          <div className="relative group">
+            <button className="flex items-center px-3 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors">
+              <DownloadIcon size={16} className="mr-1" />
+              Экспорт
+            </button>
+            <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block">
+              <button 
+                onClick={handleExportToCSV}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                CSV
+              </button>
+              <button 
+                onClick={handleExportToExcel}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Excel (XLSX)
+              </button>
+              <button 
+                onClick={handleExportToWord}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Word (DOCX)
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       

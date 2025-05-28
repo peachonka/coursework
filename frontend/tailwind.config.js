@@ -11,22 +11,24 @@ export default {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}"
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     fontFamily: {
-      sans: ['Montserrat', 'sans-serif'],
-      heading: ['Montserrat-Bold', 'sans-serif'],
-      black: ['Montserrat-Black', 'sans-serif'],
-
+      sans: ['Montserrat', 'sans-serif']
     },
     extend: {
+      fontWeight: {
+        black: '900',
+        extraBold: '800',
+        bold: '700',
+        semiBold: '600',
+        medium: '500',
+        normal: '400',
+      },
       fontSize: {
-        // при необходимости добавьте кастомные размеры
+        // Добавьте кастомные размеры, если нужно
       },
     },
   },
   plugins: [],
-}
+};

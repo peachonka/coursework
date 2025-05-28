@@ -72,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     authApi.logout();
-    setUser(null);
     navigate('/auth/login');
   };
 

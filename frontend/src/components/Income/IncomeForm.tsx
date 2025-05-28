@@ -1,22 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import { IncomeType, AccountType } from '../../types';
 import { XIcon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
+import { FamilyMember } from '../../types';
+import { familyApi } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 interface IncomeFormProps {
   onClose: () => void;
 }
 
 const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
-  const { addIncome, familyMembers, getCurrentMember } = useBudget();
-  const currentMember = getCurrentMember();
-  
+  const { addIncome, familyMembers } = useBudget();
+  const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);  
   const [amount, setAmount] = useState<number>(0);
   const [type, setType] = useState<IncomeType>(IncomeType.SALARY);
   const [date, setDate] = useState<string>(formatDateToYYYYMMDD(new Date()));
   const [familyMemberId, setFamilyMemberId] = useState<string>(currentMember?.id || '');
   const [accountType, setAccountType] = useState<AccountType>(AccountType.MAIN);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      let isMounted = true;
+  
+      const checkFamily = async () => {
+        try {
+          const response = (await familyApi.getCurrentMember()).data;
+  
+          if (isMounted) {
+            if (response.isMember && response.member) {
+              setCurrentMember(response.member);
+            } else {
+              navigate('/families/create');
+            }
+          }
+        } catch (err) {
+          if (isMounted) {
+            console.error('Ошибка:', err);
+            navigate('/families/create');
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
+      };
+  
+      checkFamily();
+  
+      return () => {
+        isMounted = false;
+      };
+    }, [navigate]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +78,12 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
           <XIcon size={20} />
         </button>
       </div>
-      
+      {isLoading ? (
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-2 text-sm text-gray-500">Загрузка...</p>
+          </div>
+        ) : (
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
@@ -145,7 +188,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
             Добавить доход
           </button>
         </div>
-      </form>
+      </form>)}
     </div>
   );
 };

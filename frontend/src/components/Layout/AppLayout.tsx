@@ -6,7 +6,7 @@ import Sidebar from './Sidebar';
 import { AccountType, FamilyMember } from '../../types';
 import { familyApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 const AppLayout: React.FC = () => {
   const { accountBalance } = useBudget();

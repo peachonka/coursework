@@ -38,7 +38,14 @@ export const authApi = {
     localStorage.setItem('jwt_token', data.token);
     return data;
   },
-  logout: () => localStorage.removeItem('jwt_token'),
+  logout: async () => {
+    // 1. Отправляем запрос на сервер для выхода
+      await api.post('/auth/logout'); // или другой endpoint вашего API
+      // 2. Очищаем локальное хранилище
+      localStorage.removeItem('jwt_token');
+      // 3. Очищаем заголовок авторизации
+      delete api.defaults.headers.common['Authorization'];
+  },
   getCurrentUser: async () => (await api.get('/auth/me')).data,
   updateProfile: async (userData: { name?: string; email?: string }) => 
     (await api.put('/auth/me', userData)).data,
@@ -80,27 +87,71 @@ export const budgetApi = {
   incomes: {
     create: async (incomeData: {
       amount: number;
-      source: string;
+      accountType: string;
+      type: string; // Изменено с source на type для соответствия модели
       description?: string;
       familyMemberId: string;
       date?: string;
-    }) => (await api.post('/incomes', incomeData)).data,
+    }) => {
+      try {
+        const response = await api.post('/incomes', {
+          ...incomeData,
+          FamilyMemberId: incomeData.familyMemberId // Приводим к нужному регистру
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Income creation failed:', error);
+        throw error;
+      }
+    },
 
     getAll: async (filters?: {
       startDate?: string;
       endDate?: string;
       familyMemberId?: string;
-    }) => (await api.get('/incomes', { params: filters })).data,
+    }) => {
+      try {
+        // Преобразуем параметры для бэкенда
+        const params = {
+          memberId: filters?.familyMemberId,
+          startDate: filters?.startDate ? new Date(filters.startDate) : null,
+          endDate: filters?.endDate ? new Date(filters.endDate) : null
+        };
+        
+        const response = await api.get('/incomes', { params });
+        return response.data;
+      } catch (error) {
+        console.error('Failed to fetch incomes:', error);
+        throw error;
+      }
+    },
 
     update: async (id: string, updates: {
       amount?: number;
-      source?: string;
+      type?: string; // Изменено с source на type
       description?: string;
-    }) => (await api.put(`/incomes/${id}`, updates)).data,
+    }) => {
+      try {
+        const response = await api.put(`/incomes/${id}`, updates);
+        return response.data;
+      } catch (error) {
+        console.error('Income update failed:', error);
+        throw error;
+      }
+    },
 
-    delete: async (id: string) => (await api.delete(`/incomes/${id}`)).data
+    delete: async (id: string) => {
+      try {
+        const response = await api.delete(`/incomes/${id}`);
+        return response.data;
+      } catch (error) {
+        console.error('Income deletion failed:', error);
+        throw error;
+      }
+    }
   },
 
+  // Аналогичные исправления для expenses
   expenses: {
     create: async (expenseData: {
       amount: number;
@@ -109,7 +160,18 @@ export const budgetApi = {
       familyMemberId: string;
       isPlanned?: boolean;
       date?: string;
-    }) => (await api.post('/expenses', expenseData)).data,
+    }) => {
+      try {
+        const response = await api.post('/expenses', {
+          ...expenseData,
+          FamilyMemberId: expenseData.familyMemberId
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Expense creation failed:', error);
+        throw error;
+      }
+    },
 
     getAll: async (filters?: {
       startDate?: string;
@@ -117,16 +179,48 @@ export const budgetApi = {
       category?: string;
       familyMemberId?: string;
       isPlanned?: boolean;
-    }) => (await api.get('/expenses', { params: filters })).data,
+    }) => {
+      try {
+        const params = {
+          category: filters?.category,
+          memberId: filters?.familyMemberId,
+          isPlanned: filters?.isPlanned,
+          startDate: filters?.startDate ? new Date(filters.startDate) : null,
+          endDate: filters?.endDate ? new Date(filters.endDate) : null
+        };
+        
+        const response = await api.get('/expenses', { params });
+        return response.data;
+      } catch (error) {
+        console.error('Failed to fetch expenses:', error);
+        throw error;
+      }
+    },
 
     update: async (id: string, updates: {
       amount?: number;
       category?: string;
       description?: string;
       isPlanned?: boolean;
-    }) => (await api.put(`/expenses/${id}`, updates)).data,
+    }) => {
+      try {
+        const response = await api.put(`/expenses/${id}`, updates);
+        return response.data;
+      } catch (error) {
+        console.error('Expense update failed:', error);
+        throw error;
+      }
+    },
 
-    delete: async (id: string) => (await api.delete(`/expenses/${id}`)).data
+    delete: async (id: string) => {
+      try {
+        const response = await api.delete(`/expenses/${id}`);
+        return response.data;
+      } catch (error) {
+        console.error('Expense deletion failed:', error);
+        throw error;
+      }
+    }
   }
 };
 

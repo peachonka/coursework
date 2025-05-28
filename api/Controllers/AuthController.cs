@@ -33,7 +33,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginDto loginDto)
     {
         var token = await _authService.Login(loginDto);
-        
+
         // Устанавливаем куку
         Response.Cookies.Append("jwt_token", token, new CookieOptions
         {
@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
             Path = "/", // Важно!
             Domain = "localhost" // Для локальной разработки
         });
-        
+
         // Возвращаем токен для Swagger/мобильных клиентов
         return Ok(new { token });
     }
@@ -64,6 +64,19 @@ public class AuthController : ControllerBase
             email = user.Email,
             name = user.Name
         });
+    }
+    
+    [HttpPost("logout")]
+    [Authorize]
+    public IActionResult Logout()
+    {
+        // Если вы используете cookie-аутентификацию
+        Response.Cookies.Delete("jwt_token");
+        
+        // Или если вам нужно что-то дополнительное
+        // _authService.Logout(User.Identity.Name);
+        
+        return Ok(new { message = "Logged out successfully" });
     }
 
     // AuthController.cs

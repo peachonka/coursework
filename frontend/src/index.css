@@ -9,9 +9,9 @@
   h4,
   h5,
   h6 {
-    font-family: theme('fontFamily.heading');
-    font-weight: 700; /* жирный по умолчанию для заголовков */
-  }
+    font-family: theme('fontFamily.sans'); 
+    font-weight: 700;
+ }
 
   body {
     font-family: theme('fontFamily.sans');

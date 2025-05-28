@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FamilyMember } from '../../types';
 import { 
-  HomeIcon, 
   UsersIcon, 
   BanknoteIcon, 
   ShoppingCartIcon, 
@@ -31,11 +30,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading }) => {
   
   const handleLogout = async () => {
     try {
-      console.log('Вызываем logout из authApi');
       // Вызываем logout из authApi
       await authApi.logout();
+      localStorage.removeItem('jwt_token');
       // Перенаправляем на страницу входа
-      navigate('/login');
+      navigate('/auth/login');
     } catch (error) {
       console.error('Ошибка при выходе:', error);
     }

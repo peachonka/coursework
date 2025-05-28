@@ -13,6 +13,6 @@ namespace BudgetApi.Models
         public required string AccountType { get; set; } // "main", "savings"
 
         [ForeignKey("FamilyMemberId")]
-        public virtual required FamilyMember FamilyMember { get; set; }
+        public virtual FamilyMember? FamilyMember { get; set; }
     }
 }
