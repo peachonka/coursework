@@ -14,9 +14,10 @@ import { authApi } from '../../api'; // Импортируем authApi из на
 
 interface SidebarProps {
   currentMember: FamilyMember | null;
+  isLoading: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentMember }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -41,12 +42,21 @@ const Sidebar: React.FC<SidebarProps> = ({ currentMember }) => {
   };
   
   return (
-    <aside className="bg-white w-64 hidden md:flex flex-col border-r border-gray-200 shrink-0">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex flex-col">
-          <h2 className="text-xl font-semibold text-gray-800">{currentMember?.name ?? 'Пользователь не найден'}</h2>
-          <p className="text-sm text-gray-500">{currentMember?.role === 'admin' ? 'Администратор' : 'Участник'}</p>
-        </div>
+    <aside className="bg-white w-64 flex flex-col border-r border-gray-200 shrink-0">
+      <div className="p-4 border-b border-gray-200 h-20">
+        {isLoading ? (
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-2 text-sm text-gray-500">Загрузка...</p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <h2 className="text-xl font-semibold text-gray-800">{currentMember?.name ?? 'Пользователь не найден'}</h2>
+            <p className="text-sm text-gray-500">
+              {currentMember?.role === 'admin' ? 'Администратор' : 'Участник'}
+            </p>
+          </div>
+        )}
       </div>
       
       <nav className="flex-1 overflow-y-auto py-4">

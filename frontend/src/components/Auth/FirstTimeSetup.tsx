@@ -107,7 +107,7 @@ const FirstTimeSetup: React.FC = () => {
             name: member.name,
             relationshipType: member.relationshipType,
             incomeTypes: member.incomeTypes,
-            userId: "", // Нужно указать реальный userId
+            userId: "", 
             familyId: familyResponse.id,
             role: "member"
           });
