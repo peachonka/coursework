@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import { FamilyMember, RelationshipType, IncomeType } from '../../types';
 import { XIcon } from 'lucide-react';
-import { familyApi } from '../../api';
+import { familyApi, authApi } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 interface FamilyMemberFormProps {
   member?: FamilyMember;
@@ -23,34 +24,45 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
   const [currentmember, setCurrentmember] = useState<FamilyMember | null>(null);
   const [familyId, setFamilyId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchFamilyId = async () => {
+    let isMounted = true;
+
+    const checkFamily = async () => {
       try {
         const response = (await familyApi.getCurrentFamily()).data;
-        if (response.hasFamily && response.family?.id) {
-          setFamilyId(response.family.id);
-        } else {
-          console.error('Семья не найдена');
+        const cmember = (await familyApi.getCurrentMember()).data;
+        if (isMounted) {
+          if (response.hasFamily) {
+            setFamilyId(response.family.id);
+          } else {
+            navigate('/families/create');
+          }
+          if (cmember.isMember) {
+            setCurrentmember(cmember.member);
+          } else {
+            navigate('/families/create');
+          }
         }
       } catch (err) {
-        console.error('Ошибка при получении семьи:', err);
+        if (isMounted) {
+          console.error('Ошибка:', err);
+          navigate('/families/create');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchFamilyId();
-  }, []);
+    checkFamily();
 
-  const getCurrent = async () => {
-    try {
-      const response = (await familyApi.getCurrentMember()).data;
-      setCurrentmember(response);
-    } catch (err) {
-      console.error('Ошибка при получении текущего члена семьи:', err);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,11 +157,11 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
               onChange={(e) => setRole(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
-                <option key={0} value={'admin'}>
-                  Администратор
-                </option>
-                 <option key={1} value={'member'}>
+                {(member?.id !== currentmember?.id) && (<option value={'admin'}>
                   Участник
+                </option>)}
+                 <option key={1} value={'member'}>
+                  Администратор
                 </option>
             </select>
         </div>)}

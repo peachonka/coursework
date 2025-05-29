@@ -42,11 +42,18 @@ namespace BudgetApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Expense>> PostExpense(Expense expense)
+        public async Task<ActionResult<Expense>> PostExpense([FromBody] ExpenseDto expenseDto)
         {
-            expense.Id = Guid.NewGuid().ToString();
-            expense.Date = expense.Date == default ? DateTime.UtcNow : expense.Date;
-
+            var expense = new Expense
+            {
+                Id = Guid.NewGuid().ToString(),
+                Amount = expenseDto.Amount,
+                Category = expenseDto.Category,
+                Date = expenseDto.Date,
+                FamilyMemberId = expenseDto.FamilyMemberId,
+                Description = expenseDto.Description ?? string.Empty,
+                IsPlanned = expenseDto.IsPlanned
+            };
             _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
@@ -65,4 +72,15 @@ namespace BudgetApi.Controllers
             return NoContent();
         }
     }
+}
+
+public class ExpenseDto
+{
+    public required string Id { get; set; }
+    public required decimal Amount { get; set; }
+    public required string Category { get; set; } // "food", "clothing"
+    public required DateTime Date { get; set; }
+    public required string FamilyMemberId { get; set; }
+    public string? Description { get; set; }
+    public required bool IsPlanned { get; set; }
 }

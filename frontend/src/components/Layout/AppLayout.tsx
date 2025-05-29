@@ -1,18 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import Sidebar from './Sidebar';
 import { AccountType, FamilyMember } from '../../types';
-import { familyApi } from '../../api';
+import { budgetApi, familyApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 
 const AppLayout: React.FC = () => {
-  const { accountBalance } = useBudget();
+  const [familyId, setCurrentFamilyId] = useState<string>('');
   const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [totalFamilyBalance, setTotalFamilyBalance] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,10 +21,19 @@ const AppLayout: React.FC = () => {
     const checkFamily = async () => {
       try {
         const response = (await familyApi.getCurrentMember()).data;
-
+        const cfamily = (await familyApi.getCurrentFamily()).data;
+        
         if (isMounted) {
           if (response.isMember && response.member) {
             setCurrentMember(response.member);
+          } else {
+            navigate('/families/create');
+          }
+          
+          if (cfamily.hasFamily) {
+            setCurrentFamilyId(cfamily.family.id);
+            // Получаем общий баланс семьи после установки familyId
+            fetchFamilyBalance();
           } else {
             navigate('/families/create');
           }
@@ -41,17 +50,23 @@ const AppLayout: React.FC = () => {
       }
     };
 
-    checkFamily();
-
-    return () => {
-      isMounted = false;
+    const fetchFamilyBalance = async () => {
+      try {
+        const accounts = await budgetApi.accounts.getFamilyAccounts();
+        const total = accounts.reduce((sum, account) => sum + account.balance, 0);
+        setTotalFamilyBalance(total);
+      } catch (error) {
+        console.error('Ошибка при получении баланса семьи:', error);
+      }
     };
-  }, [navigate]);
 
-  const totalBalance = 
-    Number(accountBalance[AccountType.MAIN]) +
-    Number(accountBalance[AccountType.SAVINGS]) +
-    Number(accountBalance[AccountType.STASH]);
+    // В useEffect:
+    useEffect(() => {
+      if (familyId) {
+        fetchFamilyBalance();
+      }
+    }, [familyId]);
+  });
   
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -88,8 +103,8 @@ const AppLayout: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-600">Общий баланс</div>
-                <div className={`text-xl font-bold ${totalBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {totalBalance.toLocaleString()} ₽
+                <div className={`text-xl font-bold ${totalFamilyBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {totalFamilyBalance.toLocaleString()} ₽
                 </div>
               </div>
             </div>

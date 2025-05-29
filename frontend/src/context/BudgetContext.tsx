@@ -12,7 +12,9 @@ import {
   // RelationshipType,
   // IncomeType
 } from '../types';
-import api from '../api';
+import api, { authApi, familyApi } from '../api';
+import { useNavigate } from 'react-router-dom';
+
 
 // // Типы для API ответов
 // interface ApiResponse<T> {
@@ -76,14 +78,39 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentFamilyId, setCurrentFamilyId] = useState<string>('');
+  const navigate = useNavigate();
 
   // Загрузка начальных данных
   useEffect(() => {
+    let isMounted = true;
+    const checkFamily = async () => {
+          try {
+            const cfamily = (await familyApi.getCurrentFamily()).data;
+            
+              if (cfamily.hasFamily) {
+                setCurrentFamilyId(cfamily.family.id);
+                // Получаем общий баланс семьи после установки familyId
+              } else {
+                navigate('/families/create');
+              }
+          } catch (err) {
+            if (isMounted) {
+              console.error('Ошибка:', err);
+              navigate('/families/create');
+            }
+          } finally {
+            if (isMounted) {
+              setIsLoading(false);
+            }
+          }
+        };
+    
     const loadInitialData = async () => {
       setIsLoading(true);
       try {
         const [membersResponse, incomesResponse, expensesResponse] = await Promise.all([
-          api.get<FamilyMember[]>('/familymembers'),
+          familyApi.getMembers(currentFamilyId),
           api.get<Income[]>('/incomes'),
           api.get<Expense[]>('/expenses')
         ]);

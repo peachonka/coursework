@@ -40,6 +40,12 @@ export enum ExpenseCategory {
   OTHER = 'other'
 }
 
+export interface FamilyAccount {
+  id: string;
+  accountType: AccountType;
+  balance: number;
+}
+
 // Family member interface
 export interface FamilyMember {
   id: string;

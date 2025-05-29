@@ -1,5 +1,6 @@
 // api.ts
 import axios from 'axios';
+import { AccountType, FamilyAccount } from './types';
 
 const api = axios.create({
   baseURL: 'http://localhost:5080/api',
@@ -76,14 +77,35 @@ export const familyApi = {
   // Управление участниками
   getCurrentMember: () => api.get('/familymembers/current'),
   getMembers: async (familyId: string) => 
-    (await api.get(`/familymembers/${familyId}`)).data,
+    (await api.get('/familymembers', { params: { familyId } })).data,
   addMember: async (memberData: { familyId: string; name: string; relationshipType: string; incomeTypes: string[] }) =>
     (await api.post(`/familymembers`, memberData)).data,
   removeMember: async (memberId: string) => 
-    (await api.delete(`/familymembers/${memberId}`)).data
+    (await api.delete(`/familymembers`, {params: {memberId}})).data,
 };
 
 export const budgetApi = {
+  accounts: {
+    getFamilyAccounts: async (): Promise<FamilyAccount[]> => {
+      try {
+        const response = await api.get('/accounts/family');
+        return response.data;
+      } catch (error) {
+        console.error('Failed to fetch family accounts:', error);
+        throw error;
+      }
+    },
+
+    getTotalFamilyBalance: async (): Promise<number> => {
+      try {
+        const accounts = await budgetApi.accounts.getFamilyAccounts();
+        return accounts.reduce((sum, account) => sum + account.balance, 0);
+      } catch (error) {
+        console.error('Failed to calculate total balance:', error);
+        throw error;
+      }
+    }
+  },
   incomes: {
     create: async (incomeData: {
       amount: number;

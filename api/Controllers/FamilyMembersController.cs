@@ -33,9 +33,9 @@ namespace BudgetApi.Controllers
 
         // GET: api/familymembers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FamilyMember>>> GetFamilyMembers()
+        public async Task<ActionResult<IEnumerable<FamilyMember>>> GetFamilyMembers(string familyId)
         {
-            return await _context.FamilyMembers.ToListAsync();
+            return await _context.FamilyMembers.Where(f => f.FamilyId == familyId).ToListAsync();
         }
 
         // POST: api/familymembers

@@ -39,40 +39,45 @@ const ExpenseList: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex md:items-center items-start space-y-2 md:flex-row flex-col justify-between">
         <div className="flex items-center">
           <ShoppingCartIcon size={24} className="text-red-500 mr-2" />
-          <h1 className="text-2xl font-bold text-gray-800">Расходы</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mr-10">Расходы</h1>
         </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={handleTogglePlannedOnly}
-            className={`flex items-center px-3 py-2 ${showPlannedOnly ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors`}
-          >
-            <CalendarClockIcon size={16} className="mr-1" />
-            {showPlannedOnly ? 'Только запланированные' : 'Все расходы'}
-          </button>
-          <button
-            onClick={handleToggleFilter}
-            className={`flex items-center px-3 py-2 ${showFilter ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors`}
-          >
-            <FilterIcon size={16} className="mr-1" />
-            Фильтр
-          </button>
-          <button
-            onClick={() => setIsAddingPlannedExpense(true)}
-            className="flex items-center px-3 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
-          >
-            <PlusIcon size={16} className="mr-1" />
-            Запланировать
-          </button>
-          <button
-            onClick={() => setIsAddingExpense(true)}
-            className="flex items-center px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-          >
-            <PlusIcon size={16} className="mr-1" />
-            Добавить расход
-          </button>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:justify-between w-full">
+          <div className='flex space-x-2 flex-row h-10'>
+            <button
+              onClick={handleTogglePlannedOnly}
+              className={`flex items-center px-3 py-2 ${showPlannedOnly ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors`}
+            >
+              <CalendarClockIcon size={16} className="mr-1" />
+              {showPlannedOnly ? 'Только запланированные' : 'Все расходы'}
+            </button>
+            <button
+              onClick={handleToggleFilter}
+              className={`flex items-center px-3 py-2 ${showFilter ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'} rounded-md hover:bg-opacity-90 transition-colors`}
+            >
+              <FilterIcon size={16} className="mr-1" />
+              Фильтр
+            </button>
+          </div>
+          
+          <div className='flex md:space-x-2 md:space-y-0 space-y-2 md:flex-row flex-col'>
+            <button
+              onClick={() => setIsAddingPlannedExpense(true)}
+              className="flex items-center px-3 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors h-10"
+            >
+              <PlusIcon size={16} className="mr-1" />
+              Запланировать
+            </button>
+            <button
+              onClick={() => setIsAddingExpense(true)}
+              className="flex items-center px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors h-10"
+            >
+              <PlusIcon size={16} className="mr-1" />
+              Добавить расход
+            </button>
+            </div>
         </div>
       </div>
       

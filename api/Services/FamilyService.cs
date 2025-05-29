@@ -38,6 +38,7 @@ namespace BudgetApi.Services
                 Id = Guid.NewGuid().ToString(),
                 CreatorId = creatorId,
                 User = user
+                
             };
 
             // Создаем запись члена семьи (создатель)

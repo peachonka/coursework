@@ -11,10 +11,11 @@ namespace BudgetApi.Models
         public required DateTime Date { get; set; } = DateTime.UtcNow;
 
         [Required]
-        [ForeignKey("FamilyMember")]
         public required string FamilyMemberId { get; set; }
-        public virtual required FamilyMember FamilyMember { get; set; }
         public required string Description { get; set; }
         public required bool IsPlanned { get; set; }
+
+        [ForeignKey("FamilyMemberId")]
+        public virtual FamilyMember? FamilyMember { get; set; }
     }
 }

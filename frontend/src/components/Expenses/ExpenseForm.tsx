@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBudget } from '../../context/BudgetContext';
 import { ExpenseCategory } from '../../types';
 import { XIcon, AlertCircleIcon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
-import { AccountType } from '../../types';
+import { AccountType, FamilyMember } from '../../types';
+import { familyApi } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 interface ExpenseFormProps {
   onClose: () => void;
@@ -11,13 +13,46 @@ interface ExpenseFormProps {
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
-  const { addExpense, canAddExpense, familyMembers, getCurrentMember, accountBalance } = useBudget();
-  const currentMember = getCurrentMember();
+  const { addExpense, canAddExpense, familyMembers, accountBalance } = useBudget();
+  const [ familyMemberId, setFamilyMemberId] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkFamily = async () => {
+      try {
+        const cmember = (await familyApi.getCurrentMember()).data;
+        if (isMounted) {
+          if (cmember.isMember) {
+            setFamilyMemberId(cmember.member.id);
+          } else {
+            navigate('/families/create');
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Ошибка:', err);
+          navigate('/families/create');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkFamily();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
   
+
   const [amount, setAmount] = useState<number>(0);
   const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.FOOD);
   const [date, setDate] = useState<string>(formatDateToYYYYMMDD(new Date()));
-  const [familyMemberId, setFamilyMemberId] = useState<string>(currentMember?.id || '');
   const [description, setDescription] = useState<string>('');
   const [error, setError] = useState<string>('');
   
@@ -51,6 +86,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
       setError('Невозможно добавить расход. Общий баланс станет отрицательным.');
     }
   };
+
+  if (isLoading) {
+    return <div className="text-center p-4">Загрузка данных семьи...</div>;
+  }
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
