@@ -37,7 +37,7 @@ export enum ExpenseCategory {
   LEISURE = 'развлечения',
   EDUCATION = 'образование',
   MEDICINE = 'медицина',
-  OTHER = 'other'
+  OTHER = 'другое'
 }
 
 export interface FamilyAccount {

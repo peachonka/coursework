@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
           
           <div className="p-3 bg-purple-50 rounded-lg flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Заначка</p>
+              <p className="text-sm text-gray-600">Инвестирование</p>
               <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.STASH].toLocaleString()} ₽</p>
             </div>
             <WalletIcon size={28} className="text-purple-500" />

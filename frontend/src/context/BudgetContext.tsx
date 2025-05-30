@@ -84,13 +84,23 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
   // Загрузка начальных данных
   useEffect(() => {
     let isMounted = true;
-    const checkFamily = async () => {
+    const loadInitialData = async () => {
           try {
             const cfamily = (await familyApi.getCurrentFamily()).data;
-            
+              
               if (cfamily.hasFamily) {
                 setCurrentFamilyId(cfamily.family.id);
-                // Получаем общий баланс семьи после установки familyId
+                const [membersResponse, incomesResponse, expensesResponse] = await Promise.all([
+                familyApi.getMembers(cfamily.family.id),
+                api.get<Income[]>('/incomes'),
+                api.get<Expense[]>('/expenses')
+              ]);
+        
+              setFamilyMembers(membersResponse);
+              setIncomes(incomesResponse.data);
+              setExpenses(expensesResponse.data);
+
+              await calculateBalances();
               } else {
                 navigate('/families/create');
               }
@@ -105,28 +115,6 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
             }
           }
         };
-    
-    const loadInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const [membersResponse, incomesResponse, expensesResponse] = await Promise.all([
-          familyApi.getMembers(currentFamilyId),
-          api.get<Income[]>('/incomes'),
-          api.get<Expense[]>('/expenses')
-        ]);
-  
-        setFamilyMembers(membersResponse.data);
-        setIncomes(incomesResponse.data);
-        setExpenses(expensesResponse.data);
-        await calculateBalances();
-
-      } catch (err) {
-        setError('Failed to load initial data');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
   
     loadInitialData();
   }, []);

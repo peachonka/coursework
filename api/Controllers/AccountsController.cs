@@ -37,9 +37,8 @@ namespace BudgetApi.Controllers
                     return NotFound("Family not found");
                 }
 
-                // Получаем все счета членов семьи
+                // Получаем все счета семьи
                 var accounts = await _context.Accounts
-                    .Include(a => a.FamilyId)
                     .Where(a => a.FamilyId == familyMember.Family.Id)
                     .Select(a => new FamilyAccountDto
                     {

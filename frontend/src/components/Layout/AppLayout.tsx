@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useBudget } from '../../context/BudgetContext';
 import Sidebar from './Sidebar';
-import { AccountType, FamilyMember } from '../../types';
+import { FamilyMember } from '../../types';
 import { budgetApi, familyApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
@@ -15,6 +14,18 @@ const AppLayout: React.FC = () => {
   const [totalFamilyBalance, setTotalFamilyBalance] = useState<number>(0);
   const navigate = useNavigate();
 
+  // Функция для получения баланса семьи
+  const fetchFamilyBalance = async () => {
+    try {
+      const accounts = await budgetApi.accounts.getFamilyAccounts();
+      const total = accounts.reduce((sum, account) => sum + account.balance, 0);
+      setTotalFamilyBalance(total);
+    } catch (error) {
+      console.error('Ошибка при получении баланса семьи:', error);
+    }
+  };
+
+  // Основной эффект для загрузки данных
   useEffect(() => {
     let isMounted = true;
 
@@ -32,8 +43,6 @@ const AppLayout: React.FC = () => {
           
           if (cfamily.hasFamily) {
             setCurrentFamilyId(cfamily.family.id);
-            // Получаем общий баланс семьи после установки familyId
-            fetchFamilyBalance();
           } else {
             navigate('/families/create');
           }
@@ -50,28 +59,26 @@ const AppLayout: React.FC = () => {
       }
     };
 
-    const fetchFamilyBalance = async () => {
-      try {
-        const accounts = await budgetApi.accounts.getFamilyAccounts();
-        const total = accounts.reduce((sum, account) => sum + account.balance, 0);
-        setTotalFamilyBalance(total);
-      } catch (error) {
-        console.error('Ошибка при получении баланса семьи:', error);
-      }
-    };
+    checkFamily();
 
-    // В useEffect:
-    useEffect(() => {
-      if (familyId) {
-        fetchFamilyBalance();
-      }
-    }, [familyId]);
-  });
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
+  // Отдельный эффект для обновления баланса при изменении familyId
+  useEffect(() => {
+    if (familyId) {
+      fetchFamilyBalance();
+    }
+  }, [familyId]);
   
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Кнопка меню для мобильных устройств */}
-
       {/* Боковая панель */}
       <div className={`
         left-0 z-40 absolute
@@ -81,7 +88,7 @@ const AppLayout: React.FC = () => {
         <Sidebar currentMember={currentMember} isLoading={isLoading} />
       </div>
 
-      {/* Затемнение фона при открытом меню на мобильных */}
+      {/* Затемнение фона */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
