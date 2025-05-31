@@ -78,7 +78,7 @@ export const familyApi = {
   getCurrentMember: () => api.get('/familymembers/current'),
   getMembers: async (familyId: string) => 
     (await api.get(`/familymembers?familyId=${encodeURIComponent(familyId)}`)).data,
-  addMember: async (memberData: { familyId: string; name: string; relationshipType: string; incomeTypes: string[] }) =>
+  addMember: async (memberData: { familyId: string; name: string; userId: string; relationshipType: string; incomeTypes: string[], role: string }) =>
     (await api.post(`/familymembers`, memberData)).data,
   removeMember: async (memberId: string) => 
     (await api.delete(`/familymembers`, {params: {memberId}})).data,

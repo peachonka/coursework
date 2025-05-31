@@ -1,73 +1,98 @@
 import React, { useState, useEffect } from 'react';
-import { useBudget } from '../../context/BudgetContext';
 import { IncomeType, AccountType } from '../../types';
 import { XIcon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
 import { FamilyMember } from '../../types';
-import { familyApi } from '../../api';
+import { familyApi, budgetApi } from '../../api'; // Added budgetApi import
 import { useNavigate } from 'react-router-dom';
 
 interface IncomeFormProps {
   onClose: () => void;
+  onSubmit?: (incomeData: Omit<Income, 'id'>) => void; // Added onSubmit prop
 }
 
-const IncomeForm: React.FC<IncomeFormProps> = ({ onClose }) => {
-  const { addIncome, familyMembers } = useBudget();
+interface Income {
+  id: string;
+  amount: number;
+  type: IncomeType;
+  date: Date;
+  familyMemberId: string;
+  accountType: AccountType;
+}
+
+const IncomeForm: React.FC<IncomeFormProps> = ({ onClose, onSubmit }) => {
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]); // Added local state for familyMembers
   const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);  
   const [amount, setAmount] = useState<number>(0);
   const [type, setType] = useState<IncomeType>(IncomeType.SALARY);
   const [date, setDate] = useState<string>(formatDateToYYYYMMDD(new Date()));
-  const [familyMemberId, setFamilyMemberId] = useState<string>(currentMember?.id || '');
+  const [familyMemberId, setFamilyMemberId] = useState<string>('');
   const [accountType, setAccountType] = useState<AccountType>(AccountType.MAIN);
   const [isLoading, setIsLoading] = useState(true);
   
   const navigate = useNavigate();
 
   useEffect(() => {
-      let isMounted = true;
+    let isMounted = true;
   
-      const checkFamily = async () => {
-        try {
-          const response = (await familyApi.getCurrentMember()).data;
-  
-          if (isMounted) {
-            if (response.isMember && response.member) {
-              setCurrentMember(response.member);
-            } else {
-              navigate('/families/create');
-            }
-          }
-        } catch (err) {
-          if (isMounted) {
-            console.error('Ошибка:', err);
+    const checkFamily = async () => {
+      try {
+        const response = (await familyApi.getCurrentMember()).data;
+        const membersResponse = await familyApi.getMembers(response.familyId);
+
+        if (isMounted) {
+          if (response.isMember && response.member) {
+            setCurrentMember(response.member);
+            setFamilyMemberId(response.member.id);
+            setFamilyMembers(membersResponse.data);
+          } else {
             navigate('/families/create');
           }
-        } finally {
-          if (isMounted) {
-            setIsLoading(false);
-          }
         }
-      };
+      } catch (err) {
+        if (isMounted) {
+          console.error('Ошибка:', err);
+          navigate('/families/create');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
   
-      checkFamily();
+    checkFamily();
   
-      return () => {
-        isMounted = false;
-      };
-    }, [navigate]);
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    addIncome({
+    const incomeData = {
       amount,
       type,
       date: new Date(date),
-      familyMemberId,
+      familyMemberId: familyMemberId || currentMember?.id || '',
       accountType
-    });
-    
-    onClose();
+    };
+
+    try {
+      if (onSubmit) {
+        onSubmit(incomeData);
+      } else {
+        // Fallback to direct API call if onSubmit not provided
+        await budgetApi.incomes.create({
+          ...incomeData,
+          date: incomeData.date.toISOString()
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error('Failed to add income:', error);
+    }
   };
   
   return (

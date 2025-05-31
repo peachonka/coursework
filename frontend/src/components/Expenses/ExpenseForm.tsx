@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useBudget } from '../../context/BudgetContext';
 import { ExpenseCategory } from '../../types';
 import { XIcon, AlertCircleIcon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
@@ -13,7 +12,6 @@ interface ExpenseFormProps {
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
-  const { addExpense, canAddExpense, familyMembers, accountBalance } = useBudget();
   const [ familyMemberId, setFamilyMemberId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();

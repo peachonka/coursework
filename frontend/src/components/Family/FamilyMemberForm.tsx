@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useBudget } from '../../context/BudgetContext';
-import { FamilyMember, RelationshipType, IncomeType } from '../../types';
+import { 
+  FamilyMember, 
+  RelationshipType, 
+  IncomeType 
+} from '../../types';
 import { XIcon } from 'lucide-react';
 import { familyApi, authApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
@@ -11,8 +14,6 @@ interface FamilyMemberFormProps {
 }
 
 const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) => {
-  const { addFamilyMember } = useBudget();
-  
   const [name, setName] = useState(member?.name || '');
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(
     member?.relationshipType || RelationshipType.HUSBAND
@@ -21,11 +22,12 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
     member?.incomeTypes || []
   );
   const [role, setRole] = useState(member?.role || 'member');
-  const [currentmember, setCurrentmember] = useState<FamilyMember | null>(null);
+  const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
   const [familyId, setFamilyId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Загрузка данных о семье и текущем пользователе
   useEffect(() => {
     let isMounted = true;
 
@@ -33,14 +35,16 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
       try {
         const response = (await familyApi.getCurrentFamily()).data;
         const cmember = (await familyApi.getCurrentMember()).data;
+
         if (isMounted) {
           if (response.hasFamily) {
             setFamilyId(response.family.id);
           } else {
             navigate('/families/create');
           }
-          if (cmember.isMember) {
-            setCurrentmember(cmember.member);
+
+          if (cmember.isMember && cmember.member) {
+            setCurrentMember(cmember.member);
           } else {
             navigate('/families/create');
           }
@@ -64,31 +68,32 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
     };
   }, [navigate]);
 
+  // Отправка формы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!familyId) {
       alert('Не удалось определить ID семьи');
       return;
     }
 
     try {
-      await addFamilyMember({
-        name,
+      await familyApi.addMember({
         familyId,
-        userId: "", // TODO: Замените на реальный userId
+        name,
+        userId: '',
         relationshipType,
         incomeTypes,
         role
       });
-      
+
       onClose();
     } catch (error) {
       console.error('Ошибка при добавлении члена семьи:', error);
       alert('Не удалось добавить члена семьи');
     }
   };
-  
+
   const handleIncomeTypeToggle = (type: IncomeType) => {
     if (incomeTypes.includes(type)) {
       setIncomeTypes(incomeTypes.filter(t => t !== type));
@@ -100,7 +105,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
   if (isLoading) {
     return <div className="text-center p-4">Загрузка данных семьи...</div>;
   }
-  
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
       <div className="flex justify-between items-center mb-4">
@@ -111,7 +116,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
           <XIcon size={20} />
         </button>
       </div>
-      
+
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
@@ -127,7 +132,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
               required
             />
           </div>
-          
+
           <div>
             <label htmlFor="relationshipType" className="block text-sm font-medium text-gray-700 mb-1">
               Тип родства
@@ -147,25 +152,24 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
           </div>
         </div>
 
-        {currentmember?.role === 'admin' && (<div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Роль
-          </label>
-          <select
-              id="role"
+        {/* Поле "Роль" отображается только для администратора */}
+        {currentMember?.role === 'admin' && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Роль
+            </label>
+            <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
-                {(member?.id !== currentmember?.id) && (<option value={'admin'}>
-                  Участник
-                </option>)}
-                 <option key={1} value={'member'}>
-                  Администратор
-                </option>
+              <option value="member">Участник</option>
+              <option value="admin">Администратор</option>
             </select>
-        </div>)}
-        
+          </div>
+        )}
+
+        {/* Выбор типов дохода */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Типы дохода
@@ -180,14 +184,17 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
                   onChange={() => handleIncomeTypeToggle(type)}
                   className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
                 />
-                <label htmlFor={`income-${type}`} className="ml-2 text-sm text-gray-700 capitalize">
+                <label
+                  htmlFor={`income-${type}`}
+                  className="ml-2 text-sm text-gray-700 capitalize"
+                >
                   {type}
                 </label>
               </div>
             ))}
           </div>
         </div>
-        
+
         <div className="flex justify-end space-x-3">
           <button
             type="button"

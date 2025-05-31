@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useBudget } from '../../context/BudgetContext';
 import { RelationshipType, IncomeType } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { familyApi } from '../../api';
 import { useEffect } from 'react';
 
 const FirstTimeSetup: React.FC = () => {
-  const { addFamilyMember } = useBudget();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -103,7 +101,7 @@ const FirstTimeSetup: React.FC = () => {
       const familyMembersWithoutCreator = familyMembers.slice(1);
       for (const member of familyMembersWithoutCreator) {
         if (member.name.trim() && member.incomeTypes.length > 0) {
-          await addFamilyMember({
+          await familyApi.addMember({
             name: member.name,
             relationshipType: member.relationshipType,
             incomeTypes: member.incomeTypes,
