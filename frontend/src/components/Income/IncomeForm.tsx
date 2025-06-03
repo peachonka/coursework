@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { IncomeType, AccountType } from '../../types';
-import { XIcon } from 'lucide-react';
+import { IncomeType } from '../../types';
+import { XIcon, Loader2Icon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
 import { FamilyMember } from '../../types';
 import { familyApi, budgetApi } from '../../api'; // Added budgetApi import
@@ -17,7 +17,6 @@ interface Income {
   type: IncomeType;
   date: Date;
   familyMemberId: string;
-  accountType: AccountType;
 }
 
 const IncomeForm: React.FC<IncomeFormProps> = ({ onClose, onSubmit }) => {
@@ -25,9 +24,9 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose, onSubmit }) => {
   const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);  
   const [amount, setAmount] = useState<number>(0);
   const [type, setType] = useState<IncomeType>(IncomeType.SALARY);
+  const [familyId, setFamilyId] = useState<string>('');
   const [date, setDate] = useState<string>(formatDateToYYYYMMDD(new Date()));
   const [familyMemberId, setFamilyMemberId] = useState<string>('');
-  const [accountType, setAccountType] = useState<AccountType>(AccountType.MAIN);
   const [isLoading, setIsLoading] = useState(true);
   
   const navigate = useNavigate();
@@ -38,13 +37,14 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose, onSubmit }) => {
     const checkFamily = async () => {
       try {
         const response = (await familyApi.getCurrentMember()).data;
-        const membersResponse = await familyApi.getMembers(response.familyId);
+        const membersResponse = await familyApi.getMembers(response.member.familyId);
 
         if (isMounted) {
-          if (response.isMember && response.member) {
+          if (response.isMember) {
             setCurrentMember(response.member);
             setFamilyMemberId(response.member.id);
-            setFamilyMembers(membersResponse.data);
+            setFamilyMembers(membersResponse);
+            setFamilyId(response.member.familyId);
           } else {
             navigate('/families/create');
           }
@@ -69,31 +69,42 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose, onSubmit }) => {
   }, [navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const incomeData = {
-      amount,
-      type,
-      date: new Date(date),
-      familyMemberId: familyMemberId || currentMember?.id || '',
-      accountType
-    };
-
-    try {
-      if (onSubmit) {
-        onSubmit(incomeData);
-      } else {
-        // Fallback to direct API call if onSubmit not provided
-        await budgetApi.incomes.create({
-          ...incomeData,
-          date: incomeData.date.toISOString()
-        });
-      }
-      onClose();
-    } catch (error) {
-      console.error('Failed to add income:', error);
-    }
+  e.preventDefault();
+  
+  const incomeData = {
+    amount,
+    type,
+    date: new Date(date),
+    familyMemberId: familyMemberId || currentMember?.id || '',
   };
+
+  try {
+    if (onSubmit) {
+      onSubmit(incomeData);
+    } else {
+      // Добавьте обновление баланса после создания дохода
+      await budgetApi.incomes.create({
+        ...incomeData,
+        date: incomeData.date.toISOString()
+      });
+      
+      // Опционально: обновите балансы счетов
+      await budgetApi.accounts.getFamilyAccounts(familyId);
+      location.reload();
+    }
+    onClose();
+  } catch (error) {
+    console.error('Failed to add income:', error);
+  }
+};
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
+  }
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -174,24 +185,6 @@ const IncomeForm: React.FC<IncomeFormProps> = ({ onClose, onSubmit }) => {
               {familyMembers.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name} ({member.relationshipType})
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">
-              Счёт
-            </label>
-            <select
-              id="accountType"
-              value={accountType}
-              onChange={(e) => setAccountType(e.target.value as AccountType)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-            >
-              {Object.values(AccountType).map((type) => (
-                <option key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
                 </option>
               ))}
             </select>

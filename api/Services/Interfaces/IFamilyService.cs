@@ -6,7 +6,7 @@ namespace BudgetApi.Services
 {
     public interface IFamilyService
     {
-        Task<Family> CreateFamily(string creatorId, string relationshipType, List<string> incomeTypes);
+        Task<Family> CreateFamily(string creatorId, string name, string relationshipType, List<string> incomeTypes);
         // Task<Family> GetFamilyByUserId(string userId);
     }
 }

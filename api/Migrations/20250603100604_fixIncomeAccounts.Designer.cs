@@ -11,14 +11,34 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250528072032_Initial")]
-    partial class Initial
+    [Migration("20250603100604_fixIncomeAccounts")]
+    partial class fixIncomeAccounts
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
+
+            modelBuilder.Entity("BudgetApi.Models.Account", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AccountType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FamilyId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Accounts");
+                });
 
             modelBuilder.Entity("BudgetApi.Models.Expense", b =>
                 {
@@ -84,7 +104,7 @@ namespace api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RelationshipType")
@@ -96,7 +116,6 @@ namespace api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -112,10 +131,6 @@ namespace api.Migrations
             modelBuilder.Entity("BudgetApi.Models.Income", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AccountType")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
@@ -148,11 +163,6 @@ namespace api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
@@ -204,8 +214,7 @@ namespace api.Migrations
                     b.HasOne("BudgetApi.Models.User", "User")
                         .WithOne("FamilyMember")
                         .HasForeignKey("BudgetApi.Models.FamilyMember", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Family");
 

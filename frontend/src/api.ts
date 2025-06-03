@@ -34,8 +34,8 @@ export const authApi = {
     localStorage.setItem('jwt_token', data.token);
     return data;
   },
-  register: async (email: string, password: string,  name: string) => {
-    const { data } = await api.post('/auth/register', { email, password, name });
+  register: async (email: string, password: string) => {
+    const { data } = await api.post('/auth/register', { email, password});
     localStorage.setItem('jwt_token', data.token);
     return data;
   },
@@ -48,15 +48,15 @@ export const authApi = {
       delete api.defaults.headers.common['Authorization'];
   },
   getCurrentUser: async () => (await api.get('/auth/me')).data,
-  updateProfile: async (userData: { name?: string; email?: string }) => 
+  updateProfile: async (userData: { email?: string }) => 
     (await api.put('/auth/me', userData)).data,
   changePassword: async (currentPassword: string, newPassword: string) => 
     (await api.post('/auth/change-password', { currentPassword, newPassword })).data
 };
 
 export const familyApi = {
-  createFamily: async (relationshipType: string, incomeTypes: string[]) => {
-    const { data } = await api.post('/families/create', { relationshipType, incomeTypes });
+  createFamily: async (name: string, relationshipType: string, incomeTypes: string[]) => {
+    const { data } = await api.post('/families/create', { name, relationshipType, incomeTypes });
     return data;
   },
 
@@ -82,13 +82,30 @@ export const familyApi = {
     (await api.post(`/familymembers`, memberData)).data,
   removeMember: async (memberId: string) => 
     (await api.delete(`/familymembers`, {params: {memberId}})).data,
+
+  getIncomingRequests: async () => {
+    const response = await api.get('/families/requests/incoming');
+    return response.data;
+  },
+  getOutgoingRequests: async () => {
+    const response = await api.get('/families/requests/outgoing');
+    return response.data;
+  },
+  acceptRequest: async (requestId: string, memberId: string) => {
+    const response = await api.post(`/families/requests/${requestId}/accept?memberId=${memberId}`);
+    return response.data;
+  },
+  rejectRequest: async (requestId: string) => {
+    const response = await api.post(`/families/requests/${requestId}/reject`);
+    return response.data;
+  }
 };
 
 export const budgetApi = {
   accounts: {
-    getFamilyAccounts: async (): Promise<FamilyAccount[]> => {
+    getFamilyAccounts: async (familyId: string): Promise<FamilyAccount[]> => {
       try {
-        const response = await api.get('/accounts/family');
+        const response = await api.get(`/accounts?familyId=${encodeURIComponent(familyId)}`);
         return response.data;
       } catch (error) {
         console.error('Failed to fetch family accounts:', error);
@@ -96,9 +113,9 @@ export const budgetApi = {
       }
     },
 
-    getTotalFamilyBalance: async (): Promise<number> => {
+    getTotalFamilyBalance: async (familyId: string): Promise<number> => {
       try {
-        const accounts = await budgetApi.accounts.getFamilyAccounts();
+        const accounts = await budgetApi.accounts.getFamilyAccounts(familyId);
         return accounts.reduce((sum, account) => sum + account.balance, 0);
       } catch (error) {
         console.error('Failed to calculate total balance:', error);
@@ -109,8 +126,7 @@ export const budgetApi = {
   incomes: {
     create: async (incomeData: {
       amount: number;
-      accountType: string;
-      type: string; // Изменено с source на type для соответствия модели
+      type: string;
       description?: string;
       familyMemberId: string;
       date?: string;
@@ -181,12 +197,13 @@ export const budgetApi = {
       description?: string;
       familyMemberId: string;
       isPlanned?: boolean;
+      accountType: number;
       date?: string;
     }) => {
       try {
         const response = await api.post('/expenses', {
           ...expenseData,
-          FamilyMemberId: expenseData.familyMemberId
+          FilterMemberId: expenseData.familyMemberId
         });
         return response.data;
       } catch (error) {
@@ -233,6 +250,9 @@ export const budgetApi = {
         throw error;
       }
     },
+
+    complete: (expenseId: string) => 
+    api.patch(`/expenses/${expenseId}/complete`),
 
     delete: async (id: string) => {
       try {

@@ -5,13 +5,11 @@ import { AuthResponse, UserData } from '../types';
 
 export const signUp = async (
   email: string,
-  password: string,
-  name: string
+  password: string
 ): Promise<AuthResponse> => {
   const response = await api.post('/auth/register', {
     email,
-    password,
-    name
+    password
   });
   return response.data;
 };

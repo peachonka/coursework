@@ -1,7 +1,6 @@
 
 import type React from "react"
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom"
-import { BudgetProvider } from "./context/BudgetContext"
 import { AuthProvider, useAuth } from "./context/AuthContext"
 import AppLayout from "./components/Layout/AppLayout"
 import AuthLayout from "./components/Layout/AuthLayout"
@@ -13,6 +12,7 @@ import FamilyMembersList from "./components/Family/FamilyMembersList"
 import IncomeList from "./components/Income/IncomeList"
 import ExpenseList from "./components/Expenses/ExpenseList"
 import ReportView from "./components/Reports/ReportView"
+import FamilyRequestsPage from "./components/Notifications/Notifications"
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth()
@@ -32,7 +32,6 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <BudgetProvider>
           <Routes>
             {/* Auth routes with AuthLayout */}
             <Route element={<AuthLayout />}>
@@ -92,6 +91,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route 
+                path="/notifications" 
+                element={
+                  <ProtectedRoute>                
+                    <FamilyRequestsPage />
+                  </ProtectedRoute>
+                } />
+
             </Route>
 
             {/* Redirects */}
@@ -99,7 +106,6 @@ function App() {
             <Route path="/signin" element={<Navigate to="/auth/login" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </BudgetProvider>
       </AuthProvider>
     </Router>
   )

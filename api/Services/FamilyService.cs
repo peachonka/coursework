@@ -20,6 +20,7 @@ namespace BudgetApi.Services
 
         public async Task<Family> CreateFamily(
             string creatorId,
+            string name,
             string relationshipType,
             List<string> incomeTypes)
         {
@@ -41,11 +42,35 @@ namespace BudgetApi.Services
                 
             };
 
+            var accSave = new Account
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FamilyId = family.Id,
+                    AccountType = AccountType.Main,
+                    Balance = 0
+                };
+
+                var invSave = new Account
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FamilyId = family.Id,
+                    AccountType = AccountType.Savings,
+                    Balance = 0
+                };
+
+                var stash = new Account
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FamilyId = family.Id,
+                    AccountType = AccountType.Investment,
+                    Balance = 0
+                };
+
             // Создаем запись члена семьи (создатель)
             var creatorMember = new FamilyMember
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = user.Name,
+                Name = name,
                 RelationshipType = relationshipType,
                 IncomeTypes = incomeTypes,
                 UserId = creatorId,
@@ -65,6 +90,12 @@ namespace BudgetApi.Services
 
                 // Сохраняем члена семьи
                 await _context.FamilyMembers.AddAsync(creatorMember);
+                await _context.SaveChangesAsync();
+
+                // Сохраняем счета
+                await _context.Accounts.AddAsync(accSave);
+                await _context.Accounts.AddAsync(invSave);
+                await _context.Accounts.AddAsync(stash);
                 await _context.SaveChangesAsync();
 
                 // Фиксируем транзакцию

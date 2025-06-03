@@ -6,22 +6,23 @@ import {
   PiggyBankIcon,
   WalletIcon,
   ArrowUpIcon,
-  ArrowDownIcon
+  ArrowDownIcon,
+  Loader2Icon
 } from 'lucide-react';
-import { authApi, familyApi, budgetApi } from '../../api';
+import { familyApi, budgetApi } from '../../api';
 import { formatDateToString } from '../../utils/dateUtils';
-import { AccountType, FamilyAccount, Income, Expense, UserData } from '../../types';
+import { AccountType, FamilyAccount, Income, Expense, FamilyMember } from '../../types';
 
 const Dashboard: React.FC = () => {
-  const [currentMember, setCurrentMember] = useState<UserData | null>(null);
+  const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
   const [recentIncomes, setRecentIncomes] = useState<Income[]>([]);
   const [recentExpenses, setRecentExpenses] = useState<Expense[]>([]);
   const [accountBalance, setAccountBalance] = useState<{
-    [key in AccountType]: number;
+    [key in AccountType]: number | null;
   }>({
-    [AccountType.MAIN]: 0,
-    [AccountType.SAVINGS]: 0,
-    [AccountType.STASH]: 0
+    [AccountType.Main]: 0,
+    [AccountType.Savings]: 0,
+    [AccountType.Investment]: 0
   });
 
   const [summary, setSummary] = useState<{
@@ -41,8 +42,8 @@ const Dashboard: React.FC = () => {
     const loadInitialData = async () => {
       try {
         // Получаем текущего пользователя
-        const userResponse = await authApi.getCurrentUser();
-        setCurrentMember(userResponse);
+        const member = await familyApi.getCurrentMember();
+        setCurrentMember(member.data.member);
 
         // Получаем семью
         const cfamily = (await familyApi.getCurrentFamily()).data;
@@ -52,30 +53,41 @@ const Dashboard: React.FC = () => {
           return;
         }
 
-        const familyId = cfamily.family.id;
-
         // Параллельно загружаем все данные
         const [incomesRes, expensesRes, accountsRes] = await Promise.all([
           budgetApi.incomes.getAll(),
           budgetApi.expenses.getAll(),
-          budgetApi.accounts.getFamilyAccounts()
+          budgetApi.accounts.getFamilyAccounts(cfamily.family.id)
         ]);
 
         const incomes: Income[] = incomesRes;
         const expenses: Expense[] = expensesRes;
         const accounts: FamilyAccount[] = accountsRes;
 
-        // Расчёт баланса по счетам
-        const accountBalances = accounts.reduce((acc, accData) => {
-          acc[accData.accountType as AccountType] += accData.balance;
-          return acc;
-        }, {
-          [AccountType.MAIN]: 0,
-          [AccountType.SAVINGS]: 0,
-          [AccountType.STASH]: 0
-        } as Record<AccountType, number>);
+        // Инициализация балансов
+        const initialBalances = {
+          [AccountType.Main]: 0,
+          [AccountType.Savings]: 0,
+          [AccountType.Investment]: 0
+        };
 
-        setAccountBalance(accountBalances);
+        // Обработка счетов
+        const updatedBalances = accounts.reduce((acc, account) => {
+          switch (account.accountType) {
+            case 0: // Текущий капитал
+              acc[AccountType.Main] = account.balance;
+              break;
+            case 1: // Резервный
+              acc[AccountType.Savings] = account.balance;
+              break;
+            case 2: // Накопления на инвестиции
+              acc[AccountType.Investment] = account.balance;
+              break;
+          }
+          return acc;
+        }, { ...initialBalances });
+
+        setAccountBalance(updatedBalances);
 
         // Расчёт доходов/расходов
         const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
@@ -104,27 +116,21 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const totalBalance = 
-    Number(accountBalance[AccountType.MAIN]) +
-    Number(accountBalance[AccountType.SAVINGS]) +
-    Number(accountBalance[AccountType.STASH]);
+    Number(accountBalance[AccountType.Main]) +
+    Number(accountBalance[AccountType.Savings]) +
+    Number(accountBalance[AccountType.Investment]);
 
   if (isLoading) {
-    return <div>Загрузка данных...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* Видео фон */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover z-0"
-      >
-        <source src="/videos/background-gradient.mp4" type="video/mp4" />
-        Ваш браузер не поддерживает видео.
-      </video>
+      
 
       <div className="relative z-10 space-y-6 p-6">
         <div className="flex items-start justify-between">
@@ -204,7 +210,7 @@ const Dashboard: React.FC = () => {
             <div className="p-3 bg-blue-50 rounded-lg flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Основной счёт</p>
-                <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.MAIN].toLocaleString()} ₽</p>
+                <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.Main]?.toLocaleString()} ₽</p>
               </div>
               <WalletIcon size={28} className="text-blue-500" />
             </div>
@@ -212,7 +218,7 @@ const Dashboard: React.FC = () => {
             <div className="p-3 bg-green-50 rounded-lg flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Накопления</p>
-                <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.SAVINGS].toLocaleString()} ₽</p>
+                <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.Savings]?.toLocaleString()} ₽</p>
               </div>
               <PiggyBankIcon size={28} className="text-green-500" />
             </div>
@@ -220,7 +226,7 @@ const Dashboard: React.FC = () => {
             <div className="p-3 bg-purple-50 rounded-lg flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Накопления на инвестиции</p>
-                <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.STASH].toLocaleString()} ₽</p>
+                <p className="text-xl font-semibold text-gray-800">{accountBalance[AccountType.Investment]?.toLocaleString()} ₽</p>
               </div>
               <WalletIcon size={28} className="text-purple-500" />
             </div>

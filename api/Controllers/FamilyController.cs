@@ -45,7 +45,7 @@ namespace BudgetApi.Controllers
 
             try
             {
-                var family = await _familyService.CreateFamily(userId, request.RelationshipType, request.IncomeTypes);
+                var family = await _familyService.CreateFamily(userId, request.Name, request.RelationshipType, request.IncomeTypes);
 
                 return Ok(new
                 {
@@ -60,47 +60,68 @@ namespace BudgetApi.Controllers
         }
 
         [HttpPost("request-join")]
-        public async Task<IActionResult> RequestToJoinFamily([FromBody] JoinFamilyRequest request)
+        public async Task<IActionResult> RequestToJoinFamily([FromBody] JoinFamilyRequestDto requestDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                // Проверяем существование пользователя-создателя
-                var creator = await _userService.GetUserByEmail(request.CreatorEmail);
+                var creator = await _userService.GetUserByEmail(requestDto.CreatorEmail);
                 if (creator == null)
-                    return NotFound($"Пользователь с email {request.CreatorEmail} не найден");
+                    return NotFound($"User with email {requestDto.CreatorEmail} not found");
 
-                // Проверяем существование текущего пользователя
                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (currentUserId == null)
                     return Unauthorized();
+                    
                 var currentUser = await _userService.GetUserById(currentUserId);
                 if (currentUser == null)
                     return Unauthorized();
 
-                // Отправляем уведомление
+                // Check if creator has a family
+                var family = await _context.Families
+                    .FirstOrDefaultAsync(f => f.CreatorId == creator.Id);
+                    
+                if (family == null)
+                    return BadRequest("The creator hasn't created a family yet");
+
+                var request = new JoinFamilyRequest
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = currentUserId,
+                    CreatorEmail = creator.Email,
+                    FamilyId = family.Id,
+                    Message = requestDto.Message,
+                    Status = "pending",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _context.JoinFamilyRequests.AddAsync(request);
+                await _context.SaveChangesAsync();
+
                 await _notificationService.SendJoinRequestAsync(
                     currentUser.Email,
                     creator.Email,
-                    request.Message ?? "Хочу присоединиться к вашей семье");
+                    requestDto.Message ?? "I want to join your family");
 
                 return Ok(new
                 {
-                    Message = "Заявка отправлена создателю семьи",
+                    Message = "Join request sent to family creator",
+                    RequestId = request.Id,
                     Creator = creator.Email,
                     User = currentUser.Email
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ошибка при отправке заявки: {ex.Message}");
+                return StatusCode(500, $"Error sending join request: {ex.Message}");
             }
         }
 
         // FamilyController.cs
-[       HttpGet("current")]
+        [HttpGet("current")]
         public async Task<IActionResult> GetCurrentFamily()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -109,16 +130,70 @@ namespace BudgetApi.Controllers
 
             var family = await _context.Families
                 .FirstOrDefaultAsync(f => f.FamilyMembers.Any(fm => fm.UserId == userId));
-            
-            return family == null 
-                ? Ok(new { hasFamily = false, message = "User is not linked to any family" }) 
+
+            return family == null
+                ? Ok(new { hasFamily = false, message = "User is not linked to any family" })
                 : Ok(new { hasFamily = true, family });
         }
-    }
+        
+        // GET: api/families/requests/incoming
+        [HttpGet("requests/incoming")]
+        public async Task<ActionResult<IEnumerable<JoinFamilyRequest>>> GetIncomingRequests()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userService.GetUserById(userId);
+            var requests = await _context.JoinFamilyRequests
+                .Where(r => r.CreatorEmail == user.Email && r.Status == "pending")
+                .Include(r => r.User)
+                .ToListAsync();
+            
+            return Ok(requests);
+        }
 
-    public class JoinFamilyRequest
-    {
-        public string CreatorEmail { get; set; } = string.Empty;
-        public string? Message { get; set; }
+        // POST: api/families/requests/{id}/accept
+        [HttpPost("requests/{id}/accept")]
+        public async Task<IActionResult> AcceptRequest(string id, [FromQuery] string memberId)
+        {
+            var request = await _context.JoinFamilyRequests.FindAsync(id);
+            if (request == null) return NotFound();
+
+            request.Status = "accepted";
+            request.UpdatedAt = DateTime.UtcNow;
+
+            var memberRes = await _context.FamilyMembers.FindAsync(memberId);
+
+            // Добавляем пользователя в семью
+            var user = await _userService.GetUserById(request.UserId);
+            if (user == null || memberRes == null) return NotFound();
+
+            memberRes.UserId = user.Id;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Заявка принята", request });
+        }
+
+        // POST: api/families/requests/{id}/reject
+        [HttpPost("requests/{id}/reject")]
+        public async Task<IActionResult> RejectRequest(string id)
+        {
+            var request = await _context.JoinFamilyRequests.FindAsync(id);
+            if (request == null) return NotFound();
+
+            request.Status = "rejected";
+            request.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Заявка отклонена", request });
+        }
     }
+}
+
+// JoinFamilyRequestDto.cs
+
+public class JoinFamilyRequestDto
+{
+    public string CreatorEmail { get; set; } = null!;
+    public string? Message { get; set; }
 }

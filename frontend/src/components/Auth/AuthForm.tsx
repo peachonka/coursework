@@ -18,7 +18,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
   // const { executeRecaptcha } = useGoogleReCaptcha();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [reppassword, setRepPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +37,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
           setError('Пароли не совпадают');
           return;
         }
-        else await signUp(email, password, name);
+        else await signUp(email, password);
         navigate('/first-setup');
       } else {
         const { token } = await signIn(email, password);
@@ -65,23 +64,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
-
-        {mode === 'signup' && 
-        (<div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Имя
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            required
-            autoComplete="name"
-          />
-        </div>)
-        }
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">

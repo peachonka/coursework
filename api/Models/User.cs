@@ -15,10 +15,6 @@ namespace BudgetApi.Models
         [Required]
         public required string PasswordHash { get; set; }
 
-        [Required]
-        [MaxLength(20)]
-        public required string Name { get; set; }
-
         public virtual Family? CreatedFamily { get; set; }
         public virtual FamilyMember? FamilyMember { get; set; }
     }

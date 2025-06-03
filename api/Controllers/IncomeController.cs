@@ -2,6 +2,8 @@ using BudgetApi.Models;
 using BudgetApi.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace BudgetApi.Controllers
 {
@@ -25,8 +27,9 @@ namespace BudgetApi.Controllers
         {
             try
             {
-                IQueryable<Income> query = _context.Incomes;
-
+                IQueryable<Income> query = _context.Incomes
+                    .Include(i => i.FamilyMember);
+                    
                 if (!string.IsNullOrEmpty(memberId))
                     query = query.Where(i => i.FamilyMemberId == memberId);
 
@@ -55,13 +58,19 @@ namespace BudgetApi.Controllers
                 Id = Guid.NewGuid().ToString(),
                 Amount = incomeDto.Amount,
                 Type = incomeDto.Type,
-                AccountType = incomeDto.AccountType,
                 FamilyMemberId = incomeDto.FamilyMemberId,
                 Date = incomeDto.Date
             };
 
+            // 2. Находим соответствующий счет
+        var account = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.AccountType == 0);
+
+            // Обновляем баланс существующего счета
+            if (account != null) account.Balance += incomeDto.Amount;
+
             _context.Incomes.Add(income);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();            
 
             return CreatedAtAction(nameof(GetIncomes), new { id = income.Id }, income);
         }
@@ -71,8 +80,16 @@ namespace BudgetApi.Controllers
 public class IncomeCreateDto
 {
     public decimal Amount { get; set; }
-    public required string AccountType { get; set; }
     public required string Type { get; set; }
     public required string FamilyMemberId { get; set; }
     public DateTime Date { get; set; }
 }
+
+public class IncomeResponseDto
+    {
+        public string Id { get; set; } = null!;
+        public decimal Amount { get; set; }
+        public string Type { get; set; } = null!;
+        public DateTime Date { get; set; }
+        public FamilyMember? FamilyMember { get; set; }
+    }

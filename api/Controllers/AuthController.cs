@@ -62,7 +62,6 @@ public class AuthController : ControllerBase
         {
             id = user.Id,
             email = user.Email,
-            name = user.Name
         });
     }
     

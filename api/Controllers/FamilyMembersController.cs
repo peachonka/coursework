@@ -46,6 +46,11 @@ namespace BudgetApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (memberDto.UserId == "")
+            {
+                memberDto.UserId = null;
+            }
+
             // Создаем нового члена семьи
             var member = new FamilyMember
             {
@@ -89,7 +94,7 @@ public class FamilyMemberDto
 
     public List<string>? IncomeTypes { get; set; }
     
-    public string? UserId { get; set; } = null!;
+    public string? UserId { get; set; }
     
     [Required]
     public string FamilyId { get; set; } = null!;

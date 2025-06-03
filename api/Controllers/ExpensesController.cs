@@ -52,8 +52,15 @@ namespace BudgetApi.Controllers
                 Date = expenseDto.Date,
                 FamilyMemberId = expenseDto.FamilyMemberId,
                 Description = expenseDto.Description ?? string.Empty,
+                Account = expenseDto.AccountType,
                 IsPlanned = expenseDto.IsPlanned
             };
+
+            var account = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.AccountType == expenseDto.AccountType);
+
+            if (account != null && !expenseDto.IsPlanned) account.Balance -= expenseDto.Amount;
+
             _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
@@ -71,16 +78,38 @@ namespace BudgetApi.Controllers
 
             return NoContent();
         }
+
+        [HttpPatch("{id}/complete")]
+        public async Task<IActionResult> CompletePlannedExpense(string id)
+        {
+            var expense = await _context.Expenses.FindAsync(id);
+
+            if (expense != null)
+            {
+                var account = await _context.Accounts
+                .FirstOrDefaultAsync(a => a.AccountType == expense.Account);
+
+                if (account != null) account.Balance -= expense.Amount;
+
+                expense.IsPlanned = false;
+                expense.Date = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            } else {
+                return NotFound();
+            }
+        }
     }
 }
 
 public class ExpenseDto
 {
-    public required string Id { get; set; }
     public required decimal Amount { get; set; }
     public required string Category { get; set; } // "food", "clothing"
     public required DateTime Date { get; set; }
     public required string FamilyMemberId { get; set; }
     public string? Description { get; set; }
+    public required AccountType AccountType { get; set; }
     public required bool IsPlanned { get; set; }
 }

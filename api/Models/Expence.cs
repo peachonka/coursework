@@ -9,13 +9,10 @@ namespace BudgetApi.Models
         public required decimal Amount { get; set; }
         public required string Category { get; set; } // "food", "clothing"
         public required DateTime Date { get; set; } = DateTime.UtcNow;
-
-        [Required]
         public required string FamilyMemberId { get; set; }
         public required string Description { get; set; }
         public required bool IsPlanned { get; set; }
-
-        [ForeignKey("FamilyMemberId")]
+        public required AccountType Account { get; set; }
         public virtual FamilyMember? FamilyMember { get; set; }
     }
 }

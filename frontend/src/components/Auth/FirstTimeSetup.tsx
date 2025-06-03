@@ -3,6 +3,7 @@ import { RelationshipType, IncomeType } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { familyApi } from '../../api';
 import { useEffect } from 'react';
+import { Loader2Icon } from 'lucide-react';
 
 const FirstTimeSetup: React.FC = () => {
   const navigate = useNavigate();
@@ -89,6 +90,7 @@ const FirstTimeSetup: React.FC = () => {
       const incomeTypesStrings = creator.incomeTypes.map(type => type.toString());
       
       const familyResponse = await familyApi.createFamily(
+        creator.name,
         creator.relationshipType.toString(), 
         incomeTypesStrings
       );
@@ -122,7 +124,11 @@ const FirstTimeSetup: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="text-center p-8">Проверяем данные...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
   }
 
   return (
@@ -149,7 +155,7 @@ const FirstTimeSetup: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {index > 0 && (<div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Имя
                 </label>
@@ -160,7 +166,7 @@ const FirstTimeSetup: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
-              </div>)}
+              </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

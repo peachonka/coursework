@@ -3,7 +3,6 @@ using BudgetApi.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 namespace BudgetApi.Controllers
 {
@@ -19,27 +18,15 @@ namespace BudgetApi.Controllers
             _context = context;
         }
 
-        // GET: api/accounts/family
-        [HttpGet("family")]
-        public async Task<ActionResult<IEnumerable<FamilyAccountDto>>> GetFamilyAccounts()
+        // GET: api/accounts
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<FamilyAccountDto>>> GetFamilyAccounts([FromQuery] string familyId)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                
-                // Находим члена семьи текущего пользователя
-                var familyMember = await _context.FamilyMembers
-                    .Include(fm => fm.Family)
-                    .FirstOrDefaultAsync(fm => fm.UserId == userId);
-                
-                if (familyMember == null || familyMember.Family == null)
-                {
-                    return NotFound("Family not found");
-                }
-
                 // Получаем все счета семьи
                 var accounts = await _context.Accounts
-                    .Where(a => a.FamilyId == familyMember.Family.Id)
+                    .Where(a => a.FamilyId == familyId)
                     .Select(a => new FamilyAccountDto
                     {
                         Id = a.Id,

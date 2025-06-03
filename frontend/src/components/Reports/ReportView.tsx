@@ -1,18 +1,75 @@
-import React, { useState } from 'react';
-import { useBudget } from '../../context/BudgetContext';
-import { BarChartIcon, DownloadIcon, FilterIcon } from 'lucide-react';
-import { Income, Expense, DateRange } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { BarChartIcon, DownloadIcon, FilterIcon, Loader2Icon } from 'lucide-react';
+import { Income, Expense, DateRange, FamilyMember } from '../../types';
 import { formatDateToString } from '../../utils/dateUtils';
 import FilterForm from '../shared/FilterForm';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { Document, Paragraph, Packer, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
+import { budgetApi, familyApi } from '../../api';
+
+interface BudgetSummary {
+  totalIncome: number;
+  totalExpenses: number;
+  balance: number;
+}
 
 const ReportView: React.FC = () => {
-  const { getFilteredIncomes, getFilteredExpenses, getBudgetSummary, familyMembers } = useBudget();
   const [showFilter, setShowFilter] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  
+  const [incomes, setIncomes] = useState<Income[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [summary, setSummary] = useState<BudgetSummary>({
+    totalIncome: 0,
+    totalExpenses: 0,
+    balance: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Загрузка данных
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [incomesData, expensesData] = await Promise.all([
+          budgetApi.incomes.getAll({
+            startDate: dateRange?.startDate?.toISOString(),
+            endDate: dateRange?.endDate?.toISOString()
+          }),
+          budgetApi.expenses.getAll({
+            startDate: dateRange?.startDate?.toISOString(),
+            endDate: dateRange?.endDate?.toISOString()
+          }),
+        ]);
+
+        const currentFamily = await familyApi.getCurrentFamily();
+        const membersData = await familyApi.getMembers(currentFamily.data.family.id);
+
+        setIncomes(incomesData);
+        setExpenses(expensesData);
+        setFamilyMembers(membersData);
+
+        // Расчет итогов
+        const totalIncome = incomesData.reduce((sum: number, income: Income) => sum + income.amount, 0);
+        const totalExpenses = expenses
+          .filter(expense => !expense.isPlanned)
+          .reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
+        
+        setSummary({
+          totalIncome,
+          totalExpenses,
+          balance: totalIncome - totalExpenses
+        });
+      } catch (error) {
+        console.error('Failed to load report data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [dateRange]);
+
   const handleToggleFilter = () => {
     setShowFilter(!showFilter);
   };
@@ -22,22 +79,46 @@ const ReportView: React.FC = () => {
     setShowFilter(false);
   };
   
-  const incomes = getFilteredIncomes(dateRange);
-  const expenses = getFilteredExpenses(dateRange);
-  const summary = getBudgetSummary(dateRange);
-  
-  const getFamilyMemberName = (id: string) => {
-    const member = familyMembers.find(m => m.id === id);
-    return member ? member.name : 'Неизвестно';
+  const getFamilyMemberName = (id: string): FamilyMember => {
+    console.log(familyMembers);
+    const member = familyMembers.find((m: FamilyMember) => m.id === id);
+    console.log(member);
+    return member!;
   };
   
-  const getFamilyMemberWithRelation = (id: string) => {
-    const member = familyMembers.find(m => m.id === id);
-    if (!member) return 'Неизвестно';
-    return `${member.name} (${member.relationshipType})`;
+
+  // Экспорт в Excel (XLSX)
+  const handleExportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Отчет");
+
+    // Заголовки
+    worksheet.addRow(["Категория", "Член семьи", "Сумма", "Дата"]);
+
+    // Данные
+    incomes.forEach(income => {
+      worksheet.addRow([
+        `Доход (${income.type})`,
+        getFamilyMemberName(income.familyMemberId),
+        income.amount,
+        formatDateToString(income.date)
+      ]);
+    });
+
+    expenses.forEach(expense => {
+      worksheet.addRow([
+        `Расход (${expense.category})`,
+        getFamilyMemberName(expense.familyMemberId),
+        expense.amount,
+        formatDateToString(expense.date)
+      ]);
+    });
+
+    // Сохранение
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), "budget_report.xlsx");
   };
 
-  // Экспорт в CSV (оставлен для совместимости)
   const handleExportToCSV = () => {
     let csvContent = 'Категория,Член семьи,Сумма,Дата\n';
     
@@ -56,39 +137,6 @@ const ReportView: React.FC = () => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, 'family_budget_report.csv');
   };
-
-  // Экспорт в Excel (XLSX)
-  const handleExportToExcel = async () => {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Отчет");
-
-  // Заголовки
-  worksheet.addRow(["Категория", "Член семьи", "Сумма", "Дата"]);
-
-  // Данные
-  incomes.forEach(income => {
-    worksheet.addRow([
-      `Доход (${income.type})`,
-      getFamilyMemberName(income.familyMemberId),
-      income.amount,
-      formatDateToString(income.date)
-    ]);
-  });
-
-  expenses.forEach(expense => {
-    worksheet.addRow([
-      `Расход (${expense.category})`,
-      getFamilyMemberName(expense.familyMemberId),
-      expense.amount,
-      formatDateToString(expense.date)
-    ]);
-  });
-
-  // Сохранение
-  const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), "budget_report.xlsx");
-};
-
 
   // Экспорт в Word (DOCX)
   const handleExportToWord = async () => {
@@ -130,7 +178,7 @@ const ReportView: React.FC = () => {
               ...incomes.map(income => new TableRow({
                 children: [
                   new TableCell({ children: [new Paragraph(`Доход (${income.type})`)] }),
-                  new TableCell({ children: [new Paragraph(getFamilyMemberWithRelation(income.familyMemberId))] }),
+                  new TableCell({ children: [new Paragraph(getFamilyMemberName(income.familyMemberId).name + ' (' + getFamilyMemberName(income.familyMemberId).relationshipType + ')')] }),
                   new TableCell({ children: [new Paragraph(income.amount.toString())] }),
                   new TableCell({ children: [new Paragraph(formatDateToString(income.date))] }),
                 ],
@@ -158,7 +206,7 @@ const ReportView: React.FC = () => {
                 .map(expense => new TableRow({
                   children: [
                     new TableCell({ children: [new Paragraph(`Расход (${expense.category})`)] }),
-                    new TableCell({ children: [new Paragraph(getFamilyMemberWithRelation(expense.familyMemberId))] }),
+                    new TableCell({ children: [new Paragraph(getFamilyMemberName(expense.familyMemberId).name + ' (' + getFamilyMemberName(expense.familyMemberId).relationshipType + ')')] }),
                     new TableCell({ children: [new Paragraph(expense.amount.toString())] }),
                     new TableCell({ children: [new Paragraph(formatDateToString(expense.date))] }),
                   ],
@@ -212,6 +260,14 @@ const ReportView: React.FC = () => {
   const dateRangeDisplay = dateRange 
     ? `${formatDateToString(dateRange.startDate)} - ${formatDateToString(dateRange.endDate)}`
     : 'За все время';
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -312,7 +368,7 @@ const ReportView: React.FC = () => {
                       {income.type}
                     </td>
                     <td className="py-2 px-4 border-b border-r text-gray-800">
-                      {getFamilyMemberWithRelation(income.familyMemberId)}
+                      {getFamilyMemberName(income.familyMemberId).name} ({getFamilyMemberName(income.familyMemberId).relationshipType})
                     </td>
                     <td className="py-2 px-4 border-b border-r text-green-600 font-medium">
                       {income.amount.toLocaleString()} ₽
@@ -347,7 +403,7 @@ const ReportView: React.FC = () => {
                         {expense.category}
                       </td>
                       <td className="py-2 px-4 border-b border-r text-gray-800">
-                        {getFamilyMemberWithRelation(expense.familyMemberId)}
+                        {getFamilyMemberName(expense.familyMemberId).name} ({getFamilyMemberName(expense.familyMemberId).relationshipType})
                       </td>
                       <td className="py-2 px-4 border-b border-r text-red-600 font-medium">
                         {expense.amount.toLocaleString()} ₽

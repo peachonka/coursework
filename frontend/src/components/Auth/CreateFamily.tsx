@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authApi, familyApi } from '../../api';
 import api from '../../api';
 import axios from 'axios';
+import { Loader2Icon } from 'lucide-react';
 
 
 const CreateFamily: React.FC = () => {
@@ -65,15 +66,17 @@ const CreateFamily: React.FC = () => {
   
 
   if (isLoading) {
-    return <div className="text-center p-8">Проверяем данные...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
   }
 
 
   return (
     <div>
-      <div className="text-center">
-          <p className="mb-4 text-gray-600">Создайте семью или подайте заявку на вступление.</p>
-          
+      <div className="text-center">          
           <div className="flex flex-col gap-4 max-w-md mx-auto">
             <button
               onClick={() => navigate('/auth/first-setup')}
@@ -81,9 +84,10 @@ const CreateFamily: React.FC = () => {
             >
               Создать семью
             </button>
+            <p className="mb-2 text-xs text-gray-600">Или или подайте заявку на вступление в существующую семью</p>
+
 
             <div className="mt-6">
-              <h3 className="mb-2">Или вступите в существующую семью</h3>
               <div className="flex gap-2">
                 <input
                   type="email"
@@ -95,7 +99,7 @@ const CreateFamily: React.FC = () => {
                 <button
                   onClick={handleJoinRequest}
                   disabled={!creatorEmail}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-300"
+                  className="px-4 py-2 bg-blue-200 ring-2 ring-blue-500 text-blue-500 rounded-md hover:bg-blue-100 disabled:bg-gray-300 disabled:ring-0 disabled:text-white"
                 >
                   Подать заявку
                 </button>

@@ -7,16 +7,19 @@ import {
   ShoppingCartIcon, 
   BarChartIcon, 
   LogOutIcon,
-  LayoutDashboardIcon
+  LayoutDashboardIcon,
+  Bell
 } from 'lucide-react';
 import { authApi } from '../../api'; // Импортируем authApi из нашего API
 
 interface SidebarProps {
   currentMember: FamilyMember | null;
   isLoading: boolean;
+  incomingCnt: number;
+  handleClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading, incomingCnt, handleClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -41,19 +44,27 @@ const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading }) => {
   };
   
   return (
-    <aside className="bg-white w-64 flex flex-col border-r border-gray-200 shrink-0">
+    <aside className="bg-white w-64 flex flex-col border-r border-gray-200 shrink-0" onClick={handleClose}>
       <div className="p-4 border-b border-gray-200 h-20">
         {isLoading ? (
           <div className="flex flex-col items-center">
             <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-2 text-sm text-gray-500">Загрузка...</p>
+            <p className="mt-2 text-sm text-gray-300">Загрузка...</p>
           </div>
         ) : (
-          <div className="flex flex-col">
-            <h2 className="text-xl font-semibold text-gray-800">{currentMember?.name ?? 'Пользователь не найден'}</h2>
-            <p className="text-sm text-gray-500">
-              {currentMember?.role === 'admin' ? 'Администратор' : 'Участник'}
-            </p>
+          <div className="flex items-center">
+            <div className="flex flex-col">
+              <h2 className="text-xl font-semibold text-gray-800">{currentMember?.name ?? 'Пользователь не найден'}</h2>
+              <p className="text-sm text-gray-500">
+                {currentMember?.role === 'admin' ? 'Администратор' : 'Участник'}
+              </p>
+            </div>
+            {(currentMember?.role === 'admin') && (
+              <Link to={'/notifications'} className="ml-auto relative">
+                {(incomingCnt>0) && (<div className='absolute left-0 top-0 rounded-full flex items-center justify-center font-bold bg-blue-500 text-white h-4 w-4 text-xs'>{incomingCnt}</div>)}
+                <Bell size={24} className="text-gray-500 m-1" />
+              </Link>
+            )}
           </div>
         )}
       </div>

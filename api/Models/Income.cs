@@ -10,9 +10,6 @@ namespace BudgetApi.Models
         public required string Type { get; set; } // "salary", "pension" и т.д.
         public required DateTime Date { get; set; } = DateTime.UtcNow;
         public required string FamilyMemberId { get; set; }
-        public required string AccountType { get; set; } // "main", "savings"
-
-        [ForeignKey("FamilyMemberId")]
         public virtual FamilyMember? FamilyMember { get; set; }
     }
 }

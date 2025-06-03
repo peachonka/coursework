@@ -16,6 +16,7 @@ namespace BudgetApi.Data
         public DbSet<Family> Families { get; set; }
         public DbSet<FamilyMember> FamilyMembers { get; set; }
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<JoinFamilyRequest> JoinFamilyRequests { get; set; }
 
         // Data/AppDbContext.cs
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -58,6 +59,19 @@ namespace BudgetApi.Data
                 .HasOne(i => i.FamilyMember)
                 .WithMany()
                 .HasForeignKey(i => i.FamilyMemberId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<JoinFamilyRequest>()
+                .HasOne(j => j.User)
+                .WithMany()
+                .HasForeignKey(j => j.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+                
+            modelBuilder.Entity<JoinFamilyRequest>()
+                .HasOne(j => j.Family)
+                .WithMany()
+                .HasForeignKey(j => j.FamilyId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

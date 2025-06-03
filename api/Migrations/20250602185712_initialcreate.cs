@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace api.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Accounts",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    FamilyId = table.Column<string>(type: "TEXT", nullable: false),
+                    AccountType = table.Column<int>(type: "INTEGER", nullable: false),
+                    Balance = table.Column<decimal>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Accounts", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
@@ -47,7 +61,6 @@ namespace api.Migrations
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     CreatedFamilyId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -65,10 +78,10 @@ namespace api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     RelationshipType = table.Column<string>(type: "TEXT", nullable: false),
                     IncomeTypes = table.Column<string>(type: "TEXT", nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
                     FamilyId = table.Column<string>(type: "TEXT", nullable: false),
                     Role = table.Column<string>(type: "TEXT", nullable: false)
                 },
@@ -98,7 +111,7 @@ namespace api.Migrations
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FamilyMemberId = table.Column<string>(type: "TEXT", nullable: false),
-                    AccountType = table.Column<string>(type: "TEXT", nullable: false)
+                    AccountType = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -171,6 +184,9 @@ namespace api.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Families_Users_CreatorId",
                 table: "Families");
+
+            migrationBuilder.DropTable(
+                name: "Accounts");
 
             migrationBuilder.DropTable(
                 name: "Expenses");

@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
-import { useBudget } from '../../context/BudgetContext';
+import React, { useState, useEffect } from 'react';
 import { FamilyMember } from '../../types';
-import { UsersIcon, PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
+import { UsersIcon, PlusIcon, EditIcon, TrashIcon, Loader2Icon } from 'lucide-react';
 import FamilyMemberForm from './FamilyMemberForm';
+import { familyApi } from '../../api';
 
 const FamilyMembersList: React.FC = () => {
-  const { familyMembers, removeFamilyMember } = useBudget();
   const [isAdding, setIsAdding] = useState(false);
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [currentMember, setCurrentMember] = useState<FamilyMember | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
+  // Загрузка членов семьи при монтировании компонента
+  useEffect(() => {
+    const loadFamilyMembers = async () => {
+      try {
+        const currentFamily = await familyApi.getCurrentFamily();
+        const members = await familyApi.getMembers(currentFamily.data.family.id);
+        const currentMember = await familyApi.getCurrentMember();
+        setFamilyMembers(members);
+        setCurrentMember(currentMember.data.member);
+      } catch (error) {
+        console.error('Failed to load family members:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadFamilyMembers();
+  }, []);
+
   const handleAddClick = () => {
     setIsAdding(true);
     setEditingMember(null);
@@ -22,7 +43,8 @@ const FamilyMembersList: React.FC = () => {
   const handleRemoveClick = async (id: string) => {
     if (confirm('Вы уверены, что хотите удалить этого члена семьи?')) {
       try {
-        await removeFamilyMember(id);
+        await familyApi.removeMember(id);
+        setFamilyMembers(prev => prev.filter(m => m.id !== id));
       } catch (error) {
         console.error('Failed to remove family member:', error);
       }
@@ -33,6 +55,18 @@ const FamilyMembersList: React.FC = () => {
     setIsAdding(false);
     setEditingMember(null);
   };
+
+  const handleMemberAdded = (newMember: FamilyMember) => {
+    setFamilyMembers(prev => [...prev, newMember]);
+    handleFormClose();
+  };
+
+  const handleMemberUpdated = (updatedMember: FamilyMember) => {
+    setFamilyMembers(prev => 
+      prev.map(m => m.id === updatedMember.id ? updatedMember : m)
+    );
+    handleFormClose();
+  };
   
   // Безопасное форматирование типов дохода
   const formatIncomeTypes = (types?: string[]) => {
@@ -42,6 +76,14 @@ const FamilyMembersList: React.FC = () => {
       .join(', ');
   };
   
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -49,21 +91,30 @@ const FamilyMembersList: React.FC = () => {
           <UsersIcon size={24} className="text-blue-500 mr-2" />
           <h1 className="text-2xl font-bold text-gray-800">Члены семьи</h1>
         </div>
-        <button
-          onClick={handleAddClick}
-          className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-        >
-          <PlusIcon size={16} className="mr-1" />
-          Добавить
-        </button>
+        {(currentMember?.role === 'admin') && (
+          <button
+            onClick={handleAddClick}
+            className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          >
+            <PlusIcon size={16} className="mr-1" />
+            Добавить
+          </button>
+        )}
       </div>
       
       {isAdding && (
-        <FamilyMemberForm onClose={handleFormClose} />
+        <FamilyMemberForm 
+          onClose={handleFormClose}
+          onMemberAdded={handleMemberAdded}
+        />
       )}
       
       {editingMember && (
-        <FamilyMemberForm member={editingMember} onClose={handleFormClose} />
+        <FamilyMemberForm 
+          member={editingMember} 
+          onClose={handleFormClose}
+          onMemberUpdated={handleMemberUpdated}
+        />
       )}
       
       {familyMembers.length === 0 ? (
@@ -94,13 +145,13 @@ const FamilyMembersList: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Типы дохода
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {(currentMember?.role === 'admin') && (<th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Действия
-                </th>
+                </th>)}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {familyMembers.map((member) => (
+              {familyMembers.map((member: FamilyMember) => (
                 <tr key={member.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{member.name}</div>
@@ -113,22 +164,24 @@ const FamilyMembersList: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatIncomeTypes(member.incomeTypes)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEditClick(member)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
-                      aria-label="Редактировать"
-                    >
-                      <EditIcon size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleRemoveClick(member.id)}
-                      className="text-red-600 hover:text-red-900"
-                      aria-label="Удалить"
-                    >
-                      <TrashIcon size={16} />
-                    </button>
-                  </td>
+                  {(currentMember?.role === 'admin') && (
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleEditClick(member)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        aria-label="Редактировать"
+                      >
+                        <EditIcon size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleRemoveClick(member.id)}
+                        className="text-red-600 hover:text-red-900"
+                        aria-label="Удалить"
+                      >
+                        <TrashIcon size={16} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

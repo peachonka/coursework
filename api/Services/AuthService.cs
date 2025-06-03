@@ -44,7 +44,6 @@ namespace BudgetApi.Services
             {
                 Email = registerDto.Email,
                 PasswordHash = _passwordHasher.HashPassword(registerDto.Password),
-                Name = registerDto.Name
             };
 
             // // Создание члена семьи
@@ -77,24 +76,5 @@ namespace BudgetApi.Services
 
             return _tokenGenerator.GenerateToken(user);
         }
-
-        // public async Task<bool> AssignAdminRole(string currentUserId, string targetUserId)
-        // {
-        //     var currentUser = await _context.FamilyMembers
-        //         .FirstOrDefaultAsync(fm => fm.UserId == currentUserId);
-            
-        //     if (currentUser?.Role != "admin") 
-        //         return false;
-
-        //     var targetMember = await _context.FamilyMembers
-        //         .FirstOrDefaultAsync(fm => fm.UserId == targetUserId);
-            
-        //     if (targetMember == null) 
-        //         return false;
-
-        //     targetMember.Role = "admin";
-        //     await _context.SaveChangesAsync();
-        //     return true;
-        // }
     }
 }

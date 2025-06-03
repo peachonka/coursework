@@ -19,3 +19,13 @@
     line-height: 1.6;
   }
 }
+
+.hover-badge:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+select:focus {
+  outline: none; /* Убираем стандартную обводку */
+  border-color: #4a90e2; /* Цвет границы при фокусе */
+}

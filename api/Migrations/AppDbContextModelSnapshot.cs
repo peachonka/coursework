@@ -42,6 +42,9 @@ namespace api.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Account")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
@@ -130,10 +133,6 @@ namespace api.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("AccountType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
@@ -155,6 +154,46 @@ namespace api.Migrations
                     b.ToTable("Incomes");
                 });
 
+            modelBuilder.Entity("BudgetApi.Models.JoinFamilyRequest", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatorEmail")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FamilyId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("JoinFamilyRequests");
+                });
+
             modelBuilder.Entity("BudgetApi.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -164,11 +203,6 @@ namespace api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
@@ -236,6 +270,25 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.Navigation("FamilyMember");
+                });
+
+            modelBuilder.Entity("BudgetApi.Models.JoinFamilyRequest", b =>
+                {
+                    b.HasOne("BudgetApi.Models.Family", "Family")
+                        .WithMany()
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BudgetApi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Family");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BudgetApi.Models.User", b =>

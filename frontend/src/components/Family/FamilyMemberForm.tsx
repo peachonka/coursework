@@ -4,13 +4,15 @@ import {
   RelationshipType, 
   IncomeType 
 } from '../../types';
-import { XIcon } from 'lucide-react';
-import { familyApi, authApi } from '../../api';
+import { XIcon, Loader2Icon } from 'lucide-react';
+import { familyApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
 interface FamilyMemberFormProps {
   member?: FamilyMember;
   onClose: () => void;
+  onMemberAdded?: (newMember: FamilyMember) => void; // добавляем здесь
+  onMemberUpdated?: (updatedMember: FamilyMember) => void; // добавляем здесь
 }
 
 const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) => {
@@ -35,7 +37,6 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
       try {
         const response = (await familyApi.getCurrentFamily()).data;
         const cmember = (await familyApi.getCurrentMember()).data;
-
         if (isMounted) {
           if (response.hasFamily) {
             setFamilyId(response.family.id);
@@ -71,7 +72,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
   // Отправка формы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    console.log(familyId);
     if (!familyId) {
       alert('Не удалось определить ID семьи');
       return;
@@ -88,6 +89,7 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
       });
 
       onClose();
+      location.reload();
     } catch (error) {
       console.error('Ошибка при добавлении члена семьи:', error);
       alert('Не удалось добавить члена семьи');
@@ -103,7 +105,11 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
   };
 
   if (isLoading) {
-    return <div className="text-center p-4">Загрузка данных семьи...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
   }
 
   return (

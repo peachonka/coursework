@@ -1,32 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import { ExpenseCategory } from '../../types';
-import { XIcon, AlertCircleIcon } from 'lucide-react';
+import { ExpenseCategory, AccountType, FamilyMember } from '../../types';
+import { XIcon, AlertCircleIcon, Loader2Icon } from 'lucide-react';
 import { formatDateToYYYYMMDD } from '../../utils/dateUtils';
-import { AccountType, FamilyMember } from '../../types';
-import { familyApi } from '../../api';
+import { familyApi, budgetApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
 interface ExpenseFormProps {
   onClose: () => void;
   isPlanned: boolean;
+  onExpenseAdded?: (expense: Expense) => void;
 }
 
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
-  const [ familyMemberId, setFamilyMemberId] = useState<string>('');
+interface Expense {
+  id: string;
+  amount: number;
+  category: ExpenseCategory;
+  date: Date;
+  familyMemberId: string;
+  description: string;
+  account: number;
+  isPlanned: boolean;
+}
+
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned, onExpenseAdded }) => {
+  const [familyMemberId, setFamilyMemberId] = useState<string>('');
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [familyId, setFamilyId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [accountBalances, setAccountBalances] = useState<Record<AccountType, number>>({
+    [AccountType.Main]: 0,
+    [AccountType.Savings]: 0,
+    [AccountType.Investment]: 0
+  });
+  const [selectedAccountType, setSelectedAccountType] = useState<AccountType>(AccountType.Main);
+  
   const navigate = useNavigate();
+
   useEffect(() => {
     let isMounted = true;
 
-    const checkFamily = async () => {
+    const loadData = async () => {
       try {
-        const cmember = (await familyApi.getCurrentMember()).data;
+        const currentMember = await familyApi.getCurrentMember();
+        const members = await familyApi.getMembers(currentMember.data.member.familyId);
+
         if (isMounted) {
-          if (cmember.isMember) {
-            setFamilyMemberId(cmember.member.id);
+          if (currentMember.data.isMember) {
+            setFamilyMemberId(currentMember.data.member.id);
           } else {
             navigate('/families/create');
+            return;
           }
+
+          const accounts = await budgetApi.accounts.getFamilyAccounts(currentMember.data.member.familyId);
+          setFamilyMembers(members);
+          setFamilyId(currentMember.data.member.familyId);
+          
+          // Инициализация балансов
+          const initialBalances = {
+            [AccountType.Main]: 0,
+            [AccountType.Savings]: 0,
+            [AccountType.Investment]: 0
+          };
+  
+          // Обработка счетов
+          const updatedBalances = accounts.reduce((acc, account) => {
+            switch (account.accountType) {
+              case 0: // Текущий капитал
+                acc[AccountType.Main] = account.balance;
+                break;
+              case 1: // Резервный
+                acc[AccountType.Savings] = account.balance;
+                break;
+              case 2: // Накопления на инвестиции
+                acc[AccountType.Investment] = account.balance;
+                break;
+            }
+            return acc;
+          }, { ...initialBalances });
+          
+          
+          setAccountBalances(updatedBalances);
         }
       } catch (err) {
         if (isMounted) {
@@ -40,13 +94,12 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
       }
     };
 
-    checkFamily();
+    loadData();
 
     return () => {
       isMounted = false;
     };
   }, [navigate]);
-  
 
   const [amount, setAmount] = useState<number>(0);
   const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.FOOD);
@@ -55,38 +108,54 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
   const [error, setError] = useState<string>('');
   
   const totalBalance = 
-    Number(accountBalance[AccountType.MAIN]) +
-    Number(accountBalance[AccountType.SAVINGS]) +
-    Number(accountBalance[AccountType.STASH]);
+    Number(accountBalances[AccountType.Main]) +
+    Number(accountBalances[AccountType.Savings]) +
+    Number(accountBalances[AccountType.Investment]);
+
+  const canAddExpense = (expenseAmount: number) => {
+    return accountBalances[selectedAccountType] - expenseAmount >= 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    // Проверка на отрицательный баланс для фактических расходов
     if (!isPlanned && !canAddExpense(amount)) {
-      setError('Невозможно добавить расход. Общий баланс станет отрицательным.');
+      setError(`Невозможно добавить расход. Баланс на счете "${selectedAccountType}" станет отрицательным.`);
       return;
     }
     
-    const success = await addExpense({
-      amount,
-      category,
-      date: new Date(date),
-      familyMemberId,
-      description,
-      isPlanned
-    });
-    
-    if (success) {
+    try {
+      const expenseData = {
+        amount,
+        category,
+        date: new Date(date).toISOString(),
+        familyMemberId,
+        description,
+        isPlanned,
+        accountType: selectedAccountType == AccountType.Main ? 0 : selectedAccountType == AccountType.Savings ? 1 : 2
+      };
+
+      const newExpense = await budgetApi.expenses.create(expenseData);
+      
+      if (onExpenseAdded) {
+        onExpenseAdded(newExpense);
+      }
+      
       onClose();
-    } else {
-      setError('Невозможно добавить расход. Общий баланс станет отрицательным.');
+      location.reload();
+    } catch (error) {
+      console.error('Failed to add expense:', error);
+      setError('Произошла ошибка при добавлении расхода. Попробуйте снова.');
     }
   };
 
   if (isLoading) {
-    return <div className="text-center p-4">Загрузка данных семьи...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
   }
   
   return (
@@ -100,13 +169,23 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
         </button>
       </div>
       
-      {!isPlanned && totalBalance <= 0 && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 flex items-start">
-          <AlertCircleIcon size={20} className="mr-2 flex-shrink-0" />
-          <p className="text-sm">
-            Внимание: Ваш общий баланс составляет {totalBalance.toLocaleString()} ₽. 
-            Добавление новых расходов запрещено при отрицательном балансе.
-          </p>
+      {!isPlanned && (
+        <div className="mb-4 space-y-2">
+          {Object.values(AccountType).map(type => (
+            <div key={type} className="flex justify-between items-center">
+              <span>{type}:</span>
+              <span className="font-medium">{accountBalances[type]?.toLocaleString()} ₽</span>
+            </div>
+          ))}
+          {totalBalance <= 0 && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 flex items-start">
+              <AlertCircleIcon size={20} className="mr-2 flex-shrink-0" />
+              <p className="text-sm">
+                Внимание: Ваш общий баланс составляет {totalBalance.toLocaleString()} ₽. 
+                Добавление новых расходов запрещено при отрицательном балансе.
+              </p>
+            </div>
+          )}
         </div>
       )}
       
@@ -118,7 +197,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
       
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
+<div>
             <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
               Сумма (₽)
             </label>
@@ -197,8 +276,26 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, isPlanned }) => {
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
               placeholder="Введите краткое описание"
-              required
             />
+          </div>
+
+          <div>
+            <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">
+              Счет списания
+            </label>
+            <select
+              id="accountType"
+              value={selectedAccountType}
+              onChange={(e) => setSelectedAccountType(e.target.value as AccountType)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+              disabled={isPlanned}
+            >
+              {Object.values(AccountType).map(type => (
+                <option key={type} value={type}>
+                  {type} ({accountBalances[type]?.toLocaleString()} ₽)
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         

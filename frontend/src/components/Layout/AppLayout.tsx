@@ -4,7 +4,8 @@ import Sidebar from './Sidebar';
 import { FamilyMember } from '../../types';
 import { budgetApi, familyApi } from '../../api';
 import { useNavigate } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, Loader2Icon } from 'lucide-react';
+
 
 const AppLayout: React.FC = () => {
   const [familyId, setCurrentFamilyId] = useState<string>('');
@@ -12,44 +13,48 @@ const AppLayout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [totalFamilyBalance, setTotalFamilyBalance] = useState<number>(0);
+  const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
+  
+
   const navigate = useNavigate();
 
   // Функция для получения баланса семьи
-  const fetchFamilyBalance = async () => {
+  const fetchFamilyBalance = async (fid: string) => {
     try {
-      const accounts = await budgetApi.accounts.getFamilyAccounts();
-      const total = accounts.reduce((sum, account) => sum + account.balance, 0);
+      const accounts = await budgetApi.accounts.getFamilyAccounts(fid);
+      const total = accounts.reduce((sum, acc) => sum + acc.balance, 0);
       setTotalFamilyBalance(total);
     } catch (error) {
-      console.error('Ошибка при получении баланса семьи:', error);
+      console.error('Ошибка при получении баланса:', error);
+      setTotalFamilyBalance(0);
     }
   };
 
-  // Основной эффект для загрузки данных
+  // Основной эффект для проверки пользователя и семьи
   useEffect(() => {
     let isMounted = true;
 
     const checkFamily = async () => {
       try {
-        const response = (await familyApi.getCurrentMember()).data;
-        const cfamily = (await familyApi.getCurrentFamily()).data;
-        
+        const memberResponse = (await familyApi.getCurrentMember()).data;
+        const familyResponse = (await familyApi.getCurrentFamily()).data;
+        const incomingRes = await familyApi.getIncomingRequests();
+        setIncomingRequests(incomingRes);
+
         if (isMounted) {
-          if (response.isMember && response.member) {
-            setCurrentMember(response.member);
-          } else {
+          if (!memberResponse.isMember || !familyResponse.hasFamily) {
             navigate('/families/create');
+            return;
           }
-          
-          if (cfamily.hasFamily) {
-            setCurrentFamilyId(cfamily.family.id);
-          } else {
-            navigate('/families/create');
-          }
+
+          setCurrentMember(memberResponse.member);
+          const currentFamilyId = familyResponse.family.id;
+          setCurrentFamilyId(currentFamilyId);
+          fetchFamilyBalance(currentFamilyId); // Получаем баланс сразу после установки familyId
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Ошибка:', err);
+          console.error('Ошибка при проверке семьи:', err);
           navigate('/families/create');
         }
       } finally {
@@ -66,15 +71,19 @@ const AppLayout: React.FC = () => {
     };
   }, [navigate]);
 
-  // Отдельный эффект для обновления баланса при изменении familyId
+  // Обновляем баланс при изменении familyId
   useEffect(() => {
     if (familyId) {
-      fetchFamilyBalance();
+      fetchFamilyBalance(familyId);
     }
   }, [familyId]);
-  
-  if (isLoading) {
-    return <div>Loading...</div>;
+
+   if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className='animate-spin text-blue-500' size={32} />
+      </div>
+    );
   }
 
   return (
@@ -85,7 +94,7 @@ const AppLayout: React.FC = () => {
         ${isSidebarOpen ? 'flex' : 'hidden'} 
         md:flex md:relative w-64 bg-white h-full
       `}>
-        <Sidebar currentMember={currentMember} isLoading={isLoading} />
+        <Sidebar currentMember={currentMember} isLoading={isLoading} incomingCnt={incomingRequests.length} handleClose={() => setIsSidebarOpen(false)} />
       </div>
 
       {/* Затемнение фона */}

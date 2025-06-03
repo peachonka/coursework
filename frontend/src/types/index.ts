@@ -23,9 +23,9 @@ export enum IncomeType {
 
 // Account types for allocating income
 export enum AccountType {
-  MAIN = 'текущий капитал',
-  SAVINGS = 'резервный капитал',
-  STASH = 'инвестиционный капитал'
+  Main = 'текущий капитал',
+  Savings = 'резервный капитал',
+  Investment = 'инвестиционный капитал'
 }
 
 // Expense categories
@@ -42,7 +42,7 @@ export enum ExpenseCategory {
 
 export interface FamilyAccount {
   id: string;
-  accountType: AccountType;
+  accountType: number;
   balance: number;
 }
 
@@ -64,7 +64,7 @@ export interface Income {
   type: IncomeType;
   date: Date;
   familyMemberId: string;
-  accountType: AccountType;
+  familyMember: FamilyMember;
 }
 
 // Expense interface
@@ -75,14 +75,15 @@ export interface Expense {
   date: Date;
   familyMemberId: string;
   description: string;
+  account: number;
   isPlanned: boolean;
 }
 
 // Account balance interface
 export interface AccountBalance {
-  [AccountType.MAIN]: number;    // текущий капитал
-  [AccountType.SAVINGS]: number; // резервный капитал
-  [AccountType.STASH]: number;   // инвестиционный капитал
+  [AccountType.Main]: number;    // текущий капитал
+  [AccountType.Savings]: number; // резервный капитал
+  [AccountType.Investment]: number;   // инвестиционный капитал
 }
 
 // Session interface
@@ -112,8 +113,16 @@ export interface AuthResponse {
   user: UserData;
 }
 
+export interface JoinFamilyRequest {
+  id: string;
+  creatorEmail: string;
+  userEmail: string;
+  message: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: Date;
+}
+
 export interface UserData {
   id: string;
   email: string;
-  name: string;
 }
