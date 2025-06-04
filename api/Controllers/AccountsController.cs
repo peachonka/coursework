@@ -24,7 +24,6 @@ namespace BudgetApi.Controllers
         {
             try
             {
-                // Получаем все счета семьи
                 var accounts = await _context.Accounts
                     .Where(a => a.FamilyId == familyId)
                     .Select(a => new FamilyAccountDto

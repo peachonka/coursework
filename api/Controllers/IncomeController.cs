@@ -62,11 +62,9 @@ namespace BudgetApi.Controllers
                 Date = incomeDto.Date
             };
 
-            // 2. Находим соответствующий счет
         var account = await _context.Accounts
             .FirstOrDefaultAsync(a => a.AccountType == 0);
 
-            // Обновляем баланс существующего счета
             if (account != null) account.Balance += incomeDto.Amount;
 
             _context.Incomes.Add(income);

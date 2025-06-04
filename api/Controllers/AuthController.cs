@@ -14,10 +14,9 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IFamilyService _familyService;
 
-    // Конструктор с обоими зависимостями
     public AuthController(AppDbContext context, IAuthService authService, IFamilyService familyService)
     {
-        _context = context; // Сохраняем контекст в поле
+        _context = context; 
         _authService = authService;
         _familyService = familyService;
     }
@@ -34,18 +33,16 @@ public class AuthController : ControllerBase
     {
         var token = await _authService.Login(loginDto);
 
-        // Устанавливаем куку
         Response.Cookies.Append("jwt_token", token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true, // Для localhost можно false, в production - true
             SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddDays(1),
-            Path = "/", // Важно!
+            Path = "/",
             Domain = "localhost" // Для локальной разработки
         });
 
-        // Возвращаем токен для Swagger/мобильных клиентов
         return Ok(new { token });
     }
 
@@ -69,42 +66,7 @@ public class AuthController : ControllerBase
     [Authorize]
     public IActionResult Logout()
     {
-        // Если вы используете cookie-аутентификацию
         Response.Cookies.Delete("jwt_token");
-        
-        // Или если вам нужно что-то дополнительное
-        // _authService.Logout(User.Identity.Name);
-        
         return Ok(new { message = "Logged out successfully" });
     }
-
-    // AuthController.cs
-    // [HttpPost("create-family")]
-    // [Authorize]
-    // public async Task<IActionResult> CreateFamily(
-    //     [FromBody] CreateFamilyRequest request)
-    // {
-    //     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    //     if (string.IsNullOrEmpty(userId))
-    //         return Unauthorized();
-
-    //     try
-    //     {
-    //         var family = await _familyService.CreateFamily(
-    //             creatorId: userId,
-    //             relationshipType: request.RelationshipType,
-    //             incomeTypes: request.IncomeTypes);
-
-    //         return Ok(new 
-    //         {
-    //             family.Id,
-    //             family.CreatorId,
-    //             isAdmin = true
-    //         });
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(new { error = ex.Message });
-    //     }
-    // }
 }

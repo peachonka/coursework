@@ -1,6 +1,4 @@
-// using BudgetApi.Models;
 using Microsoft.AspNetCore.Authorization;
-// using BudgetApi.Data;
 using BudgetApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -79,7 +77,6 @@ namespace BudgetApi.Controllers
                 if (currentUser == null)
                     return Unauthorized();
 
-                // Check if creator has a family
                 var family = await _context.Families
                     .FirstOrDefaultAsync(f => f.CreatorId == creator.Id);
                     
@@ -120,7 +117,6 @@ namespace BudgetApi.Controllers
             }
         }
 
-        // FamilyController.cs
         [HttpGet("current")]
         public async Task<IActionResult> GetCurrentFamily()
         {
@@ -163,7 +159,6 @@ namespace BudgetApi.Controllers
 
             var memberRes = await _context.FamilyMembers.FindAsync(memberId);
 
-            // Добавляем пользователя в семью
             var user = await _userService.GetUserById(request.UserId);
             if (user == null || memberRes == null) return NotFound();
 
@@ -190,8 +185,6 @@ namespace BudgetApi.Controllers
         }
     }
 }
-
-// JoinFamilyRequestDto.cs
 
 public class JoinFamilyRequestDto
 {

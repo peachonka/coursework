@@ -46,19 +46,7 @@ namespace BudgetApi.Services
                 PasswordHash = _passwordHasher.HashPassword(registerDto.Password),
             };
 
-            // // Создание члена семьи
-            // var familyMember = new FamilyMember
-            // {
-            //     Name = registerDto.Name,
-            //     RelationshipType = registerDto.RelationshipType,
-            //     UserId = user.Id,
-            //     FamilyId = family.Id,
-            //     Role = "admin" // Первый пользователь становится админом
-            // };
-
-            // await _context.Families.AddAsync(family);
             await _context.Users.AddAsync(user);
-            // await _context.FamilyMembers.AddAsync(familyMember);
             await _context.SaveChangesAsync();
 
             return user;

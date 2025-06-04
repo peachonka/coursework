@@ -18,43 +18,35 @@ namespace BudgetApi.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<JoinFamilyRequest> JoinFamilyRequests { get; set; }
 
-        // Data/AppDbContext.cs
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Уникальный индекс Email для User
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Настройка связи Family -> User (Creator)
             modelBuilder.Entity<Family>()
                 .HasOne(f => f.User)
                 .WithMany()
                 .HasForeignKey(f => f.CreatorId)
-                .OnDelete(DeleteBehavior.Restrict); // Измените на Cascade если нужно каскадное удаление
-
-            // Настройка связи Family -> FamilyMembers
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Family>()
                 .HasMany(f => f.FamilyMembers)
                 .WithOne(fm => fm.Family)
                 .HasForeignKey(fm => fm.FamilyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Настройка связи FamilyMember -> User
             modelBuilder.Entity<User>()
                 .HasOne(u => u.FamilyMember)
                 .WithOne(fm => fm.User)
                 .HasForeignKey<FamilyMember>(fm => fm.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Настройка для Expenses
             modelBuilder.Entity<Expense>()
                 .HasOne(e => e.FamilyMember)
                 .WithMany()
                 .HasForeignKey(e => e.FamilyMemberId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Настройка для Incomes
             modelBuilder.Entity<Income>()
                 .HasOne(i => i.FamilyMember)
                 .WithMany()
@@ -66,7 +58,6 @@ namespace BudgetApi.Data
                 .WithMany()
                 .HasForeignKey(j => j.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
                 
             modelBuilder.Entity<JoinFamilyRequest>()
                 .HasOne(j => j.Family)

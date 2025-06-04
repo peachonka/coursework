@@ -1,10 +1,8 @@
-// Models/FamilyMember.cs
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BudgetApi.Models
 {
-    // FamilyMember.cs
     public class FamilyMember
     {
         [Key]
@@ -27,7 +25,6 @@ namespace BudgetApi.Models
         [Required]
         public string Role { get; set; } = "member";
 
-        // Навигационные свойства
         public virtual User User { get; set; } = null!;
         public virtual Family Family { get; set; } = null!;
     }

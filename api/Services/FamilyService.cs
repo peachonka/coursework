@@ -1,4 +1,3 @@
-// FamilyService.cs
 using BudgetApi.Models;
 using BudgetApi.Data;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +27,10 @@ namespace BudgetApi.Services
                 .FirstOrDefaultAsync(f => f.CreatorId == creatorId);
             if (existingFamily != null)
                 throw new Exception("User already has a family");
-            // Получаем данные пользователя
             var user = await _userService.GetUserById(creatorId);
             if (user == null)
                 throw new Exception("User not found");
 
-            // Создаем семью
             var family = new Family
             {
                 Id = Guid.NewGuid().ToString(),
@@ -79,26 +76,21 @@ namespace BudgetApi.Services
                 Role = "admin" // Автоматически назначаем роль админа
             };
 
-            // Начинаем транзакцию
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // Сохраняем семью
                 await _context.Families.AddAsync(family);
                 await _context.SaveChangesAsync();
 
-                // Сохраняем члена семьи
                 await _context.FamilyMembers.AddAsync(creatorMember);
                 await _context.SaveChangesAsync();
 
-                // Сохраняем счета
                 await _context.Accounts.AddAsync(accSave);
                 await _context.Accounts.AddAsync(invSave);
                 await _context.Accounts.AddAsync(stash);
                 await _context.SaveChangesAsync();
 
-                // Фиксируем транзакцию
                 await transaction.CommitAsync();
 
                 return family;

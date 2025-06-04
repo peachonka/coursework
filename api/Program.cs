@@ -13,18 +13,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Укажите ваш фронтенд-адрес
+        policy.WithOrigins("http://localhost:5173") 
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // Это критически важно для кук
     });
 });
 
-// Конфигурация базы данных
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Добавление сервисов
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
@@ -32,7 +30,6 @@ builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Настройка аутентификации JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
@@ -105,15 +102,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-// app.Use(async (context, next) =>
-// {
-//     Console.WriteLine($"Incoming request: {context.Request.Method} {context.Request.Path}");
-//     await next();
-//     Console.WriteLine($"Response: {context.Response.StatusCode}");
-// });
-
-// app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 

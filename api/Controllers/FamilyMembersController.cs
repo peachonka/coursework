@@ -42,7 +42,6 @@ namespace BudgetApi.Controllers
         [HttpPost]
         public async Task<ActionResult<FamilyMember>> PostFamilyMember([FromBody] FamilyMemberDto memberDto)
         {
-            // Валидация
             if (!ModelState.IsValid || memberDto.Name == null || memberDto.RelationshipType == null || memberDto.FamilyId == null)
                 return BadRequest(ModelState);
 
@@ -51,7 +50,6 @@ namespace BudgetApi.Controllers
                 memberDto.UserId = null;
             }
 
-            // Создаем нового члена семьи
             var member = new FamilyMember
             {
                 Name = memberDto.Name,
@@ -71,7 +69,6 @@ namespace BudgetApi.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateFamilyMember([FromQuery] string memberId, [FromBody] FamilyMemberDto memberDto)
         {
-            // Валидация
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

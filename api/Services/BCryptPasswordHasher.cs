@@ -1,4 +1,3 @@
-// Services/BCryptPasswordHasher.cs
 namespace BudgetApi.Services
 {
     public interface IPasswordHasher
