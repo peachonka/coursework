@@ -130,8 +130,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      
-
       <div className="relative z-10 space-y-6 p-6">
         <div className="flex items-start justify-between">
           <div>

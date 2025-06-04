@@ -173,13 +173,15 @@ const FamilyMembersList: React.FC = () => {
                       >
                         <EditIcon size={16} />
                       </button>
-                      <button
-                        onClick={() => handleRemoveClick(member.id)}
-                        className="text-red-600 hover:text-red-900"
-                        aria-label="Удалить"
-                      >
-                        <TrashIcon size={16} />
-                      </button>
+                      {(currentMember.id !== member.id) && (
+                        <button
+                          onClick={() => handleRemoveClick(member.id)}
+                          className="text-red-600 hover:text-red-900"
+                          aria-label="Удалить"
+                        >
+                          <TrashIcon size={16} />
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>

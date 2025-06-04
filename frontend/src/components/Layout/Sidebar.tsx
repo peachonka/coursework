@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading, incomingCnt
   const navigate = useNavigate();
   
   const navigationItems = [
-    { path: '/dashboard', label: 'Дашборд', icon: <LayoutDashboardIcon size={20} /> },
+    { path: '/dashboard', label: 'Главная', icon: <LayoutDashboardIcon size={20} /> },
     { path: '/family', label: 'Участники', icon: <UsersIcon size={20} /> },
     { path: '/income', label: 'Доходы', icon: <BanknoteIcon size={20} /> },
     { path: '/expenses', label: 'Расходы', icon: <ShoppingCartIcon size={20} /> },

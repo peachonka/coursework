@@ -68,12 +68,13 @@ namespace BudgetApi.Controllers
             return CreatedAtAction(nameof(GetFamilyMembers), new { id = member.Id }, member);
         }
 
-        // DELETE: api/familymembers/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFamilyMember(string id)
+        // DELETE:
+        [HttpDelete]
+        public async Task<IActionResult> DeleteFamilyMember([FromQuery] string memberId)
         {
-            var member = await _context.FamilyMembers.FindAsync(id);
-            if (member == null) return NotFound();
+            var member = await _context.FamilyMembers.FindAsync(memberId);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (member == null || member.UserId != currentUserId) return NotFound();
 
             _context.FamilyMembers.Remove(member);
             await _context.SaveChangesAsync();

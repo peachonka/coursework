@@ -27,5 +27,6 @@
 
 select:focus {
   outline: none; /* Убираем стандартную обводку */
+  border-width: 2px; 
   border-color: #4a90e2; /* Цвет границы при фокусе */
 }
