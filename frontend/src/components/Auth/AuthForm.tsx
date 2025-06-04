@@ -24,6 +24,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
   const [showRepPassword, setShowRepPassword] = useState(false); 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isChecked, setIsChecked] = useState<boolean>(false);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsChecked(event.target.checked);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +40,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
         // Add additional signup fields as needed
         if (reppassword !== password) {
           setError('Пароли не совпадают');
+          return;
+        }
+        if (!isChecked) {
+          setError('Вы должны принять условия использования данных');
           return;
         }
         else await signUp(email, password);
@@ -129,6 +138,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
                 {showRepPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            <label>
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={handleChange}
+              />
+              Я даю согласие на обработку моих данных.
+            </label>
           </div>
         )}
 

@@ -155,7 +155,8 @@ namespace BudgetApi.Controllers
         public async Task<IActionResult> AcceptRequest(string id, [FromQuery] string memberId)
         {
             var request = await _context.JoinFamilyRequests.FindAsync(id);
-            if (request == null) return NotFound();
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (request == null || request.UserId == currentUserId) return NotFound();
 
             request.Status = "accepted";
             request.UpdatedAt = DateTime.UtcNow;
@@ -170,7 +171,7 @@ namespace BudgetApi.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "Заявка принята", request });
+            return Ok(new { Message = "Заявка принята"});
         }
 
         // POST: api/families/requests/{id}/reject

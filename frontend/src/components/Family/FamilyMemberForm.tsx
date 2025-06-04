@@ -79,7 +79,15 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
     }
 
     try {
-      await familyApi.addMember({
+      if (member) {
+        await familyApi.updateMember(member.id, {
+          name,
+          relationshipType,
+          incomeTypes,
+          role
+        });
+      } else {
+        await familyApi.addMember({
         familyId,
         name,
         userId: '',
@@ -87,12 +95,13 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
         incomeTypes,
         role
       });
+      }
 
       onClose();
       location.reload();
     } catch (error) {
-      console.error('Ошибка при добавлении члена семьи:', error);
-      alert('Не удалось добавить члена семьи');
+      console.error('Ошибка при добавлении / редактировании члена семьи:', error);
+      alert('Не удалось добавить / изменить члена семьи. Попробуйте еще раз.');
     }
   };
 
@@ -158,7 +167,6 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
           </div>
         </div>
 
-        {/* Поле "Роль" отображается только для администратора */}
         {currentMember?.role === 'admin' && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -169,13 +177,12 @@ const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({ member, onClose }) 
               onChange={(e) => setRole(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="member">Участник</option>
+              {(member?.id !== currentMember.id) && (<option value="member">Участник</option>)}
               <option value="admin">Администратор</option>
             </select>
           </div>
         )}
 
-        {/* Выбор типов дохода */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Типы дохода

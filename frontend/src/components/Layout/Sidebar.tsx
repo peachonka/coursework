@@ -8,7 +8,8 @@ import {
   BarChartIcon, 
   LogOutIcon,
   LayoutDashboardIcon,
-  Bell
+  Bell,
+  WalletIcon
 } from 'lucide-react';
 import { authApi } from '../../api'; // Импортируем authApi из нашего API
 
@@ -26,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentMember, isLoading, incomingCnt
   const navigationItems = [
     { path: '/dashboard', label: 'Главная', icon: <LayoutDashboardIcon size={20} /> },
     { path: '/family', label: 'Участники', icon: <UsersIcon size={20} /> },
+    { path: '/accounts', label: 'Счета', icon: <WalletIcon size={20} /> },
     { path: '/income', label: 'Доходы', icon: <BanknoteIcon size={20} /> },
     { path: '/expenses', label: 'Расходы', icon: <ShoppingCartIcon size={20} /> },
     { path: '/reports', label: 'Отчёты', icon: <BarChartIcon size={20} /> },

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace api.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,7 +35,8 @@ namespace api.Migrations
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FamilyMemberId = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
-                    IsPlanned = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsPlanned = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Account = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,6 +104,36 @@ namespace api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "JoinFamilyRequests",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatorEmail = table.Column<string>(type: "TEXT", nullable: false),
+                    FamilyId = table.Column<string>(type: "TEXT", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", nullable: false),
+                    Status = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JoinFamilyRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_JoinFamilyRequests_Families_FamilyId",
+                        column: x => x.FamilyId,
+                        principalTable: "Families",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_JoinFamilyRequests_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Incomes",
                 columns: table => new
                 {
@@ -110,8 +141,7 @@ namespace api.Migrations
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    FamilyMemberId = table.Column<string>(type: "TEXT", nullable: false),
-                    AccountType = table.Column<int>(type: "INTEGER", nullable: false)
+                    FamilyMemberId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -149,6 +179,16 @@ namespace api.Migrations
                 name: "IX_Incomes_FamilyMemberId",
                 table: "Incomes",
                 column: "FamilyMemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JoinFamilyRequests_FamilyId",
+                table: "JoinFamilyRequests",
+                column: "FamilyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JoinFamilyRequests_UserId",
+                table: "JoinFamilyRequests",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_CreatedFamilyId",
@@ -193,6 +233,9 @@ namespace api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Incomes");
+
+            migrationBuilder.DropTable(
+                name: "JoinFamilyRequests");
 
             migrationBuilder.DropTable(
                 name: "FamilyMembers");

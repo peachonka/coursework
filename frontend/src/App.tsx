@@ -13,6 +13,7 @@ import IncomeList from "./components/Income/IncomeList"
 import ExpenseList from "./components/Expenses/ExpenseList"
 import ReportView from "./components/Reports/ReportView"
 import FamilyRequestsPage from "./components/Notifications/Notifications"
+import AccountsManager from "./components/Accounts/Accounts"
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth()
@@ -64,6 +65,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <FamilyMembersList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts"
+                element={
+                  <ProtectedRoute>
+                    <AccountsManager />
                   </ProtectedRoute>
                 }
               />

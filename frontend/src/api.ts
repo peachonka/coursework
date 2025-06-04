@@ -82,6 +82,8 @@ export const familyApi = {
     (await api.post(`/familymembers`, memberData)).data,
   removeMember: async (memberId: string) => 
     (await api.delete(`/familymembers`, {params: {memberId}})).data,
+  updateMember: async (memberId: string, memberData: { name?: string; relationshipType?: string; incomeTypes?: string[], role?: string }) =>
+    (await api.put(`/familymembers?memberId=${encodeURIComponent(memberId)}`, memberData)).data,
 
   getIncomingRequests: async () => {
     const response = await api.get('/families/requests/incoming');
@@ -111,6 +113,11 @@ export const budgetApi = {
         console.error('Failed to fetch family accounts:', error);
         throw error;
       }
+    },
+
+    updateAccountBalance: async (familyId: string, accountType: string, balance: number) => {
+      const response = await api.patch(`/accounts?familyId=${encodeURIComponent(familyId)}&accountType=${encodeURIComponent(accountType)}`, { balance });
+      return response.data;
     },
 
     getTotalFamilyBalance: async (familyId: string): Promise<number> => {

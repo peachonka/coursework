@@ -97,9 +97,10 @@ const FamilyRequestsPage: React.FC = () => {
     const loadRequests = async () => {
       try {
         const response = (await familyApi.getCurrentMember()).data;
-        const membersResponse = await familyApi.getMembers(response.member.familyId);
+        var membersResponse: FamilyMember[] = await familyApi.getMembers(response.member.familyId);
         const incomingRes = await familyApi.getIncomingRequests();
          if (response.isMember) {
+            membersResponse = membersResponse.filter(m => m.id !== response.member.id);
             setFamilyMembers(membersResponse);
         }
         setIncomingRequests(incomingRes);

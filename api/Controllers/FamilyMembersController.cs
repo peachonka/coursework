@@ -43,7 +43,7 @@ namespace BudgetApi.Controllers
         public async Task<ActionResult<FamilyMember>> PostFamilyMember([FromBody] FamilyMemberDto memberDto)
         {
             // Валидация
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || memberDto.Name == null || memberDto.RelationshipType == null || memberDto.FamilyId == null)
                 return BadRequest(ModelState);
 
             if (memberDto.UserId == "")
@@ -68,6 +68,37 @@ namespace BudgetApi.Controllers
             return CreatedAtAction(nameof(GetFamilyMembers), new { id = member.Id }, member);
         }
 
+        [HttpPut]
+        public async Task<IActionResult> UpdateFamilyMember([FromQuery] string memberId, [FromBody] FamilyMemberDto memberDto)
+        {
+            // Валидация
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (memberDto.UserId == "")
+            {
+                memberDto.UserId = null;
+            }
+
+            var member = await _context.FamilyMembers.FindAsync(memberId);
+
+            if (member == null)
+                return NotFound();
+
+            if (memberDto.Name != null)
+                member.Name = memberDto.Name;
+            if (memberDto.RelationshipType != null)
+                member.RelationshipType = memberDto.RelationshipType;
+            if (memberDto.IncomeTypes != null)
+                member.IncomeTypes = memberDto.IncomeTypes;
+            if (memberDto.Role != null)
+                member.Role = memberDto.Role;
+
+            _context.SaveChanges();
+
+            return Ok(new { Message = "Член семьи обновлен" });
+        }
+
         // DELETE:
         [HttpDelete]
         public async Task<IActionResult> DeleteFamilyMember([FromQuery] string memberId)
@@ -86,19 +117,16 @@ namespace BudgetApi.Controllers
 
 public class FamilyMemberDto
 {
-    [Required]
     [StringLength(50)]
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; } = null!;
     
-    [Required]
-    public string RelationshipType { get; set; } = null!;
+    public string? RelationshipType { get; set; } = null!;
 
     public List<string>? IncomeTypes { get; set; }
     
     public string? UserId { get; set; }
     
-    [Required]
-    public string FamilyId { get; set; } = null!;
+    public string? FamilyId { get; set; } = null!;
 
     public string? Role { get; set; }
 }
