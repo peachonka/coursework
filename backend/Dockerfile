@@ -1,7 +1,7 @@
 # Используем официальный SDK образ для билда
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
-
+RUN dotnet nuget locals all --clear
 # Копируем .csproj и восстанавливаем зависимости
 COPY *.sln .
 COPY api/*.csproj ./api/

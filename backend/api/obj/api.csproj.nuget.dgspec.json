@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Downloads\\project-bolt-sb1-md6chjtj\\backend\\api\\api.csproj": {}
+    "C:\\Users\\User\\Desktop\\coursework\\backend\\api\\api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Downloads\\project-bolt-sb1-md6chjtj\\backend\\api\\api.csproj": {
+    "C:\\Users\\User\\Desktop\\coursework\\backend\\api\\api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Downloads\\project-bolt-sb1-md6chjtj\\backend\\api\\api.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Desktop\\coursework\\backend\\api\\api.csproj",
         "projectName": "api",
-        "projectPath": "C:\\Users\\User\\Downloads\\project-bolt-sb1-md6chjtj\\backend\\api\\api.csproj",
+        "projectPath": "C:\\Users\\User\\Desktop\\coursework\\backend\\api\\api.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Downloads\\project-bolt-sb1-md6chjtj\\backend\\api\\obj\\",
+        "outputPath": "C:\\Users\\User\\Desktop\\coursework\\backend\\api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -22,15 +22,15 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net9.0"
+          "net8.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net9.0": {
-            "targetAlias": "net9.0",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -47,8 +47,8 @@
         "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
-        "net9.0": {
-          "targetAlias": "net9.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "dependencies": {
             "BCrypt.Net-Next": {
               "target": "Package",
@@ -56,33 +56,33 @@
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
-              "version": "[9.0.5, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.5, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[9.0.5, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
-              "version": "[8.10.0, )"
+              "version": "[7.0.3, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[8.1.2, )"
+              "version": "[6.5.0, )"
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
-              "version": "[8.10.0, )"
+              "version": "[7.0.3, )"
             }
           },
           "imports": [
