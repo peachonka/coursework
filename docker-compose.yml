@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: budget-backend
+    container_name: budget-backend
+    ports:
+      - "5080:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: budget-frontend
+    container_name: budget-frontend
+    ports:
+      - "5173:80"
+    restart: unless-stopped

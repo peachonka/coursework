@@ -43,7 +43,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
           return;
         }
         if (!isChecked) {
-          setError('Вы должны принять условия использования данных');
+          setError('Для использования сервиса необходимо принять условия использования данных');
           return;
         }
         else await signUp(email, password);
@@ -115,7 +115,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
         </div>
 
         {(mode === 'signup') && (
-          <div>
+          <div className='space-y-4'>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Повторите пароль
             </label>
@@ -138,13 +138,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
                 {showRepPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            <label>
+            <label className='text-xs flex items-center'>
               <input
                 type="checkbox"
+                className='mr-2'
                 checked={isChecked}
                 onChange={handleChange}
               />
-              Я даю согласие на обработку моих данных.
+              Я даю согласие на обработку данных
             </label>
           </div>
         )}
