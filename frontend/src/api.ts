@@ -1,15 +1,11 @@
-// api.ts
 import axios from 'axios';
-import { AccountType, FamilyAccount } from './types';
+import { FamilyAccount } from './types';
 
 const api = axios.create({
   baseURL: 'http://localhost:5080/api',
   withCredentials: true,
 });
 
-
-
-// Интерцепторы остаются без изменений
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('jwt_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -40,18 +36,15 @@ export const authApi = {
     return data;
   },
   logout: async () => {
-    // 1. Отправляем запрос на сервер для выхода
-      await api.post('/auth/logout'); // или другой endpoint вашего API
-      // 2. Очищаем локальное хранилище
+      await api.post('/auth/logout');
       localStorage.removeItem('jwt_token');
-      // 3. Очищаем заголовок авторизации
       delete api.defaults.headers.common['Authorization'];
   },
   getCurrentUser: async () => (await api.get('/auth/me')).data,
-  updateProfile: async (userData: { email?: string }) => 
-    (await api.put('/auth/me', userData)).data,
-  changePassword: async (currentPassword: string, newPassword: string) => 
-    (await api.post('/auth/change-password', { currentPassword, newPassword })).data
+  // updateProfile: async (userData: { email?: string }) => 
+  //   (await api.put('/auth/me', userData)).data,
+  // changePassword: async (currentPassword: string, newPassword: string) => 
+  //   (await api.post('/auth/change-password', { currentPassword, newPassword })).data
 };
 
 export const familyApi = {

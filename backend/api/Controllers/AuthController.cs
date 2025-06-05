@@ -10,7 +10,7 @@ using System.Security.Claims;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context; // Добавляем поле для контекста
+    private readonly AppDbContext _context;
     private readonly IAuthService _authService;
     private readonly IFamilyService _familyService;
 

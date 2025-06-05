@@ -32,14 +32,6 @@ namespace BudgetApi.Services
                 throw new Exception("Пользователь с таким email уже существует");
             }
 
-            // // Создание семьи
-            // var family = new Family 
-            // { 
-            //     Id = Guid.NewGuid().ToString(), // Добавляем явную инициализацию Id
-            //     Name = registerDto.FamilyName
-            // };
-
-            // Создание пользователя
             var user = new User 
             {
                 Email = registerDto.Email,

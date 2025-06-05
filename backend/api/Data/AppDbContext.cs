@@ -29,6 +29,7 @@ namespace BudgetApi.Data
                 .WithMany()
                 .HasForeignKey(f => f.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
+                
             modelBuilder.Entity<Family>()
                 .HasMany(f => f.FamilyMembers)
                 .WithOne(fm => fm.Family)

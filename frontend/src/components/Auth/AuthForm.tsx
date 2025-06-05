@@ -11,11 +11,10 @@ interface AuthFormProps {
 
 interface AuthError {
   message: string;
-  [key: string]: any; // Additional error properties
+  [key: string]: any;
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
-  // const { executeRecaptcha } = useGoogleReCaptcha();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
